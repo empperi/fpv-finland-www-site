@@ -1,0 +1,194 @@
+/* CSS Media Query Breakpoints */
+/* Small devices (landscape phones, 576px and up) */
+@media-sm-min: 576px;
+@media-sm-max: calc(@media-sm-min - 0.02px);
+/* Medium devices (tablets, 768px and up) */
+@media-md-min: 768px;
+@media-md-max: calc(@media-md-min - 0.02px);
+/* Large devices (desktops, 992px and up) */
+@media-lg-min: 992px;
+@media-lg-max: calc(@media-lg-min - 0.02px);
+/* X-Large devices (large desktops, 1200px and up) */
+@media-xl-min: 1200px;
+@media-xl-max: calc(@media-xl-min - 0.02px);
+/* XX-Large devices (larger desktops, 1400px and up) */
+@media-xxl-min: 1400px;
+@media-xxl-max: calc(@media-xxl-min - 0.02px);
+
+@header-height: 5rem;
+@header-z-index: 10;
+
+body {
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-size: 14pt;
+}
+
+.hide {
+    display: none !important;
+}
+
+header {
+    padding: 20px;
+    position: fixed;
+    width: 100%;
+    height: @header-height;
+    background-color: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    z-index: @header-z-index;
+}
+
+main {
+    padding: 20px;
+    padding-top: calc(@header-height + 2rem);
+    display: flex;
+    justify-content: center;
+}
+
+.nav-logo {
+    width: 200px;
+}
+
+.nav-link {
+    transition:
+      color 300ms,
+      background-color 300ms;
+    margin: -20px 0px -20px 0px;
+    padding: 20px 0px 20px 0px;
+}
+
+.nav-burger {
+    display: none;
+
+    width: 50px;
+}
+
+.nav-burger-btn {
+    display: none;
+    border: 0px;
+    background: transparent;
+}
+
+.nav-burger-open {
+    font-size: 30px;
+    font-weight: 700;
+    display: inline-block;
+    width: 50px;
+}
+
+.nav-burger-list {
+    position: absolute;
+    list-style: none;
+    margin: 0;
+    background-color: white;
+    display: block;
+    top: @header-height;
+    text-align: right;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    font-size: 2rem;
+    line-height: 4rem;
+    padding-right: 2rem;
+}
+
+@media screen and (max-width: @media-md-max) {
+    .nav {
+        display: none;
+    }
+
+    .nav-burger {
+        display: block;
+    }
+
+    .nav-burger-btn {
+        display: block;
+    }
+
+    header .text-end {
+        display: none;
+    }
+}
+
+.nav-link:hover {
+    background-color: rgba(50,50,50,0.8) !important;
+    color: white !important;
+}
+
+.progress-container {
+    position: fixed;
+    top: @header-height;
+    z-index: calc(@header-z-index + 1);
+    left: 0;
+    width: 100%;
+    height: 5px; /* Height of the bar */
+    background: #ccc; /* Background for the track */
+}
+
+.progress-bar {
+    height: 100%;
+    background: #007bff; /* Color of the progress fill */
+    animation-name: progress-width;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-timeline: scroll(root);
+}
+
+@keyframes progress-width {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+article {
+    max-width: 65rem;
+}
+
+.content-wrap {
+    max-width: 65rem;
+}
+
+.article-lead .article-date {
+    color: white;
+}
+
+.article-links {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.article-link a {
+    display: flex;
+    gap: 3rem;
+}
+
+.article-link .article-date {
+    width: 5rem;
+}
+
+@border-radius-amount: 0.8rem;
+
+.article-lead {
+    background: linear-gradient(110deg, rgb(50, 50, 205), rgb(150, 150, 205));
+    padding: 2rem 2rem 0 2rem;
+    border-radius: @border-radius-amount;
+
+    margin-bottom: 5rem;
+}
+
+.article-lead h1 {
+    color: white;
+}
+
+img.lead {
+    position: relative;
+    z-index: calc(@header-z-index - 1);
+    top: 2rem;
+    width: 100%;
+    border-radius: @border-radius-amount;
+    box-shadow: 15px 15px 9px rgb(100, 100, 100);
+}
