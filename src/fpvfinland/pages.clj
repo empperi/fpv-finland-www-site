@@ -3,6 +3,7 @@
             [clojure.walk :as w]
             [commonmark-hiccup.core :as cmh]
             [fpvfinland.articles :as articles]
+            [fpvfinland.md-resources :as md]
             [fpvfinland.layout.base :as base]))
 
 (def ARTICLE_IMAGE_LEAD_CLASS "lead")
@@ -14,9 +15,11 @@
       (seq [(cmh/markdown->hiccup markdown)]))))
 
 (defn md-page [md-file-name]
+  (str
+  "<!DOCTYPE html>\n"
   (apply-layout
-    (slurp (str "resources/public/pages/" md-file-name))
-    [:div.content-wrap]))
+    (md/slurp-md-page md-file-name)
+    [:div.content-wrap])))
 
 (defn article-date-elem [article]
   (let [[year month day] (str/split (:date article) #"[-]")]

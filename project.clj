@@ -10,7 +10,9 @@
                  [ring/ring-devel "1.15.3"]
                  [ring/ring-jetty-adapter "1.15.3"]
                  [hiccup "2.0.0"]
-                 [commonmark-hiccup "0.2.0"]]
+                 [commonmark-hiccup "0.2.0"]
+                 [snowball-stemmer "0.1.1"]
+                 [metosin/jsonista "0.3.13"]]
 
   :plugins [[lein-ring "0.12.6"]]
 

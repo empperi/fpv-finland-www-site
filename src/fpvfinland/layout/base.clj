@@ -1,7 +1,8 @@
 (ns fpvfinland.layout.base
   (:require [hiccup2.core :as h]
 
-            [fpvfinland.layout.nav :as nav]))
+            [fpvfinland.layout.nav :as nav]
+            [fpvfinland.layout.search :as search]))
 
 (defn opengraph []
   (seq [[:meta {:property "og:title" :content "FPV Finland Ry"}]
@@ -25,6 +26,9 @@
     [:link {:href "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" :rel "stylesheet" :integrity "sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" :crossorigin "anonymous"}]
     (opengraph)
     [:link {:rel "stylesheet" :href "/styles/styles.css"}]
+    [:script {:type "text/javascript"}
+     (h/raw (str "const searchDatabase = " (search/memoized-search-json)))]
+    [:script {:type "text/javascript" :src "/script/Snowball.min.js"}]
     [:script {:type "text/javascript" :src "/script/scripts.js"}]]
 
    [:body
@@ -34,6 +38,7 @@
              :alt "FPV Finland"
              :class "nav-logo"}]]
      (nav/nav)
+     (search/search-input)
      [:div {:class "col-md-3 text-end"}]]]
    [:main content]])
 
