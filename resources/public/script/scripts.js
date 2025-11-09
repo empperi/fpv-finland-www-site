@@ -23,12 +23,19 @@ const toggleBurgerMenu = () => {
 };
 
 const searchFromDatabase = (searchQuery) => {
-    const stemmer = new Snowball('Finnish');
-    stemmer.setCurrent(searchQuery);
-    stemmer.stem();
-    const stemQuery = stemmer.getCurrent();
+    const stemMatcher = searchQuery.split(/[ ]+/)
+        .filter(s => s.length > 0)
+        .map(querypart => {
+            const stemmer = new Snowball('Finnish');
+            stemmer.setCurrent(querypart);
+            stemmer.stem();
+            return stemmer.getCurrent();
+        })
+        .reduce((f, q) => (strs) => {
+            return strs.find(s => s === q) !== undefined && f(strs);
+        }, (strs) => true);
 
-    return searchDatabase.filter(article => article.stems.filter(s => s === stemQuery).length > 0);
+    return searchDatabase.filter(article => stemMatcher(article.stems));
 };
 
 const hideSearchresults = () => {
@@ -69,7 +76,7 @@ const showSearchResults = (results) => {
 };
 
 const bindUserSearch = (inputElem) => {
-    inputElem.addEventListener("keypress", (event) => {
+    inputElem.addEventListener("keydown", (event) => {
         // wait until value is applied
         setTimeout(() => {
             const value = inputElem.value;
