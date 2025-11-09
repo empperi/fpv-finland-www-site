@@ -38,7 +38,7 @@
              :alt "FPV Finland"
              :class "nav-logo"}]]
      (nav/nav)
-     (search/search-input)
+     (search/search-input "full-page")
      [:div {:class "col-md-3 text-end"}]]]
    [:main content]])
 

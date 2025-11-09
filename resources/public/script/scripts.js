@@ -38,8 +38,8 @@ const searchFromDatabase = (searchQuery) => {
     return searchDatabase.filter(article => stemMatcher(article.stems));
 };
 
-const hideSearchresults = () => {
-    const searchResultsElem = document.getElementById('search-results');
+const hideSearchresults = (inputElem) => {
+    const searchResultsElem = inputElem.parentNode.querySelector('.search-results');
     searchResultsElem.classList.add('hide');
     const currentLiveResults = searchResultsElem.querySelectorAll('.live');
     if (currentLiveResults != null) {
@@ -49,8 +49,8 @@ const hideSearchresults = () => {
     }
 };
 
-const showSearchResults = (results) => {
-    const searchResultsElem = document.getElementById('search-results');
+const showSearchResults = (inputElem, results) => {
+    const searchResultsElem = inputElem.parentNode.querySelector('.search-results');
 
     const currentLiveResults = searchResultsElem.querySelectorAll('.live');
     if (currentLiveResults != null) {
@@ -59,7 +59,7 @@ const showSearchResults = (results) => {
         });
     }
 
-    const searchResultTemplate = document.getElementById('search-result-template');
+    const searchResultTemplate = searchResultsElem.querySelector('.search-result-template');
 
     results.map(result => {
         const clone = searchResultTemplate.cloneNode(true);
@@ -94,16 +94,16 @@ const bindUserSearch = (inputElem) => {
             }
 
             if (renderResults.length > 0) {
-                showSearchResults(renderResults);
+                showSearchResults(inputElem, renderResults);
             } else {
-                hideSearchresults();
+                hideSearchresults(inputElem);
             }
         }, 1);
     });
 };
 
 const bindDomEventHandlers = () => {
-    bindUserSearch(document.getElementById('search-input'));
+    document.querySelectorAll('.search-input').forEach(bindUserSearch);
 };
 
 document.addEventListener('DOMContentLoaded', bindDomEventHandlers, false);

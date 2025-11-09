@@ -1,4 +1,5 @@
-(ns fpvfinland.layout.nav)
+(ns fpvfinland.layout.nav
+  (:require [fpvfinland.layout.search :as search]))
 
 (defn- nav-link [text url]
   [:li {:class "nav-item px-0"}
@@ -16,9 +17,10 @@
                        :src "/img/burger-menu.svg"}]
      [:span.nav-burger-open {:id    "burger-menu-open"
                              :class "hide"} "X"]]
-    [:ul {:id    "nav-burger-list"
-          :class "nav-burger-list hide text-uppercase fw-bold col-12 col-md-auto mb-2 justify-content-center mb-md-0"}
-     (nav-link "Etusivu" "/")
-     (nav-link "Artikkelit" "/artikkelit/")
-     (nav-link "Yhdistys" "/yhdistys.html")
-     (nav-link "Yhteystiedot" "/yhteystiedot.html")]))
+    [:div#nav-burger-list.nav-burger-list.hide
+     (search/search-input "burger")
+     [:ul {:class "text-uppercase fw-bold col-12 col-md-auto mb-2 justify-content-center mb-md-0"}
+      (nav-link "Etusivu" "/")
+      (nav-link "Artikkelit" "/artikkelit/")
+      (nav-link "Yhdistys" "/yhdistys.html")
+      (nav-link "Yhteystiedot" "/yhteystiedot.html")]]))

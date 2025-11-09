@@ -94,6 +94,10 @@ main {
     padding-right: 2rem;
 }
 
+.search.burger {
+    display: none;
+}
+
 @media screen and (max-width: @media-md-max) {
     .nav {
         display: none;
@@ -110,6 +114,14 @@ main {
     header .text-end {
         display: none;
     }
+
+    .search.burger {
+        display: blocK;
+    }
+
+    .search.full-page {
+        display: none;
+    }
 }
 
 .nav-link:hover {
@@ -117,12 +129,12 @@ main {
     color: white !important;
 }
 
-#search {
+.search {
     position: relative;
     z-index: @header-z-index + 2;
 }
 
-#search-results {
+.search-results {
     background: white;
     padding: 1rem;
     box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.5);

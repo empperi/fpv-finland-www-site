@@ -64,14 +64,14 @@
 
 (def memoized-search-json (memoize search-json))
 
-(defn search-input []
-  [:div#search
-   [:input#search-input {:type "text"
+(defn search-input [& extra-classes]
+  [:div {:class (vec (conj extra-classes "search"))}
+   [:input.search-input {:type "text"
                          :placeholder "Hae..."
                          :name "search"}]
-   [:div#search-results.hide
+   [:div.search-results.hide
     [:ul
-     [:li#search-result-template.search-result.hide
+     [:li.search-result-template.search-result.hide
       [:a {:href ""}
        [:span.title ""]
        [:span.date ""]]]]]])
