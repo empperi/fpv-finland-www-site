@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app               # Syncs local files
+      - m2_cache:/root/.m2   # Caches Leiningen dependencies
+    ports:
+      - "3000:3000"
+
+volumes:
+  m2_cache:

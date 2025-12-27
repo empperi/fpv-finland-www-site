@@ -1,0 +1,5 @@
+.git
+target/
+classes/
+checkouts/
+profiles.clj

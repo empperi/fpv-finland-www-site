@@ -20,5 +20,8 @@
 
   :repl-options {:init-ns fpvfinland.core}
 
+  :aliases {"run-local"  ["run" "-m" "fpvfinland.core/run-lein-dev-server"]
+            "build-site" ["run" "-m" "fpvfinland.core/export"]}
+
   :ring {:handler      fpvfinland.app
          :auto-reload? true})

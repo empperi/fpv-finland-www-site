@@ -49,6 +49,18 @@
       (wrap-content-type)      ; Add Content-Type header
       (wrap-reload)))          ; Auto-reload code changes in development
 
+(defn run-lein-dev-server
+  "Same as -main but uses jetty join so that main thread is stopped to wait. This
+   allows Leiningen to keep on running thus not requiring IDE and Clojure development
+   environment outside of Leiningen and Java"
+  []
+  (println "Starting development server")
+  (let [server (jetty/run-jetty app {:port 3000 :join? false})]
+    (println "  Server started. You can edit or add md-files, add new images etc.")
+    (println "  For changes to the actual site generation logic please see README for instructions.")
+    (println "  Please open http://localhost:3000 and start editing")
+    (.join server)))
+
 (defn -main
   "The entry point to run the web server for local development."
   [& args]
@@ -62,10 +74,15 @@
 
 (defn export
   "Exports the site to a static directory."
-  [target-dir]
+  []
   (println "Exporting static resources...")
-  (let [assets (optimizations/all (get-assets) {})
+  (let [target-dir "./firebase/public"
+        assets     (-> (get-assets)
+                     (optimizations/minify-js-assets)
+                     (optimizations/minify-css-assets)
+                     (optimizations/inline-css-imports))
         pages (get-pages)]
     (stasis/empty-directory! target-dir)
+    (stasis/export-pages pages target-dir {})
     (optimus.export/save-assets assets target-dir)
-    (stasis/export-pages pages target-dir {:optimus-assets assets})))
+    (println "Export finished to" target-dir)))
