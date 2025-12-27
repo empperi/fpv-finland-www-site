@@ -34,9 +34,10 @@
    [:body
     [:header {:class "d-flex align-items-center justify-content-between py-3 mb-4 border-bottom"}
      [:div {:class "col-md-3 mb-2 mb-md-0"}
-      [:img {:src "/img/fpv-finland-logo.png"
-             :alt "FPV Finland"
-             :class "nav-logo"}]]
+      [:a {:href "/"}
+       [:img {:src "/img/fpv-finland-logo.png"
+              :alt "FPV Finland"
+              :class "nav-logo"}]]]
      (nav/nav)
      (search/search-input "full-page")]]
    [:main content]])

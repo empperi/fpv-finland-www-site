@@ -1,3 +1,5 @@
+const SEARCH_LINK_MAX_TEXT_LENGTH = 32;
+
 const showBurgerMenu = () => {
     document.getElementById("nav-burger-list").classList.remove('hide');
     document.getElementById("burger-menu-closed").classList.add('hide');
@@ -69,6 +71,14 @@ const hideSearchresults = (inputElem) => {
     }
 };
 
+const shortenString = (str, maxChars) => {
+    if (str.length <= maxChars) {
+        return str;
+    } else {
+        return str.substr(0, maxChars) + "…";
+    }
+};
+
 const showSearchResults = (inputElem, results, searchQuery) => {
     const searchParent = findParentWithClass(inputElem, 'search');
     const searchResultsElem = searchParent.querySelector('.search-results');
@@ -90,7 +100,7 @@ const showSearchResults = (inputElem, results, searchQuery) => {
         clone.classList.remove('hide');
         clone.classList.add('live');
         clone.querySelector('a').href = result.link + "#:~:text=" + searchQuery;
-        clone.querySelector('.title').textContent = result.title;
+        clone.querySelector('.title').textContent = shortenString(result.title, SEARCH_LINK_MAX_TEXT_LENGTH);
         clone.querySelector('.date').textContent = result.date.toLocaleDateString('fi');
         clone.addEventListener('click', (event) => {
            setTimeout(() => {

@@ -39,6 +39,7 @@
    2. GLOBAL & TYPOGRAPHY
    ========================================================================== */
 
+
 body {
     font-family: "Montserrat", sans-serif;
     font-optical-sizing: auto;
@@ -95,6 +96,19 @@ header {
         background-color: @col-nav-hover !important;
         color: white !important;
     }
+
+    @media screen and (max-width: @media-lg-max) {
+        font-size: 1rem;
+        padding-right: 0.6rem !important;
+        padding-left: 0.6rem !important;
+    }
+
+    @media screen and (max-width: @media-md-max) {
+        font-size: 1.8rem;
+        text-align: center;
+        padding-right: 0.6rem !important;
+        padding-left: 0.6rem !important;
+    }
 }
 
 .nav {
@@ -125,11 +139,10 @@ header {
 
     &-list {
         position: absolute;
-        list-style: none;
         margin: 0;
         background-color: white;
         display: block;
-        top: calc(@header-height + 1rem);
+        top: calc(@header-height);
         text-align: right;
         right: 0;
         left: 0;
@@ -137,7 +150,12 @@ header {
         height: 100vh;
         font-size: 2rem;
         line-height: 4rem;
-        padding-right: 2rem;
+
+        ul {
+            list-style: none;
+            margin-top: 1.5rem;
+            padding: 0;
+        }
     }
 
     @media screen and (max-width: @media-md-max) {
@@ -165,81 +183,134 @@ header {
         &.full-page { display: none; }
     }
 
-    .search-wrapper {
-        position: relative;
-        display: flex;
-        flex-direction: row;
-        height: 2.5rem;
-    }
+    /* full-page styling for normal search component */
+    &.full-page {
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            height: 2.5rem;
+        }
 
-    /* Used as click target for js-logic when clearing input field if clicking outside
-       of actual search area */
-    .search-click-target {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 100vw;
-        height: 100vh;
-    }
+        /* Used as click target for js-logic when clearing input field if clicking outside
+           of actual search area */
+        .search-click-target {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+        }
 
-    .search-input {
-        position: absolute;
-        top: 0;
-        right: 0;
-        border: 2px solid @col-shadow;
-        padding: 0.5rem;
-        opacity: 0;
-        transition: width 0.4s ease, opacity 0.3s ease;
-        cursor: pointer;
-        width: 2.5rem;
-        font-size: 0.8rem;
-        z-index: @z-search;
-        box-shadow: 1px 5px 5px rgba(0,0,0,0.3);
-        border-radius: 5px;
+        .search-input {
+            position: absolute;
+            top: 0;
+            right: 0;
+            border: 2px solid @col-shadow;
+            padding: 0.5rem;
+            opacity: 0;
+            transition: width 0.4s ease, opacity 0.3s ease;
+            cursor: pointer;
+            width: 2.5rem;
+            font-size: 0.8rem;
+            z-index: @z-search;
+            box-shadow: 1px 5px 5px rgba(0,0,0,0.3);
+            border-radius: 5px;
 
-        &:focus {
-            outline: none;
+            &:focus {
+                outline: none;
+                opacity: 1;
+                cursor: text;
+                width: @search-width;
+            }
+        }
+
+        .search-input:hover + .search-icon {
             opacity: 1;
-            cursor: text;
-            width: @search-width;
+        }
+
+        .search-input:focus + .search-icon {
+            opacity: 0;
+        }
+
+        .search-icon {
+            background: white;
+            padding-left: 0.6rem;
+            padding-top: 0.6rem;
+            border-radius: 8px;
+            border: 2px solid rgba(0,0,0,0.5);
+            opacity: 0.5;
+            z-index: @z-search-icon;
+            transition: opacity 0.3s ease;
         }
     }
 
-    .search-input:hover + .search-icon {
-        opacity: 1;
-    }
+    &.burger {
+        .search-wrapper {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 4px 4px rgba(0,0,0,0.2);
 
-    .search-input:focus + .search-icon {
-        opacity: 0;
-    }
+            border: 1px solid rgba(0,0,0,0.5);
 
-    .search-icon {
-        background: white;
-        padding-left: 0.6rem;
-        padding-top: 0.6rem;
-        border-radius: 8px;
-        border: 2px solid rgba(0,0,0,0.5);
-        opacity: 0.5;
-        z-index: @z-search-icon;
-        transition: opacity 0.3s ease;
+            input {
+                border: 0;
+                font-size: 1.5rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+
+                &:focus {
+                    outline: none;
+                }
+            }
+
+            .search-icon {
+                height: 4rem;
+                background: white;
+                padding-left: 0.6rem;
+                padding-top: 0.6rem;
+                border-radius: 8px;
+                z-index: @z-search-icon;
+                transition: opacity 0.3s ease;
+            }
+        }
+    }
+}
+
+.search.full-page .search-results {
+    position: absolute;
+    right: 0;
+    width: @search-width;
+
+    .search-result a {
+        font-size: 0.8rem;
+    }
+}
+
+.search.burger .search-results {
+    position: absolute;
+    left: 0;
+    width: 100%;
+
+    .search-result a {
+        font-size: 1.1rem;
     }
 }
 
 .search-results {
     background: white;
     box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.5);
-    position: absolute;
-    right: 0;
-    width: @search-width;
     z-index: @z-search-results;
 
     ul {
         list-style: none;
         padding: 0;
+        margin-block-end: 0;
     }
 
     .search-result {
-        margin-top: 0.5rem;
         font-size: 0.9rem;
         border-bottom: 1px solid rgba(0,0,0,0.3);
 
@@ -248,13 +319,22 @@ header {
         }
 
         a {
+            display: flex;
+            justify-content: space-between;
             text-decoration: none;
-            display: inline-block;
             width: 100%;
-            padding: 0.2rem 0.5rem;
+            padding: .6rem .5rem .6rem .5rem;
 
             &:hover {
-                background-color: rgba(0,0,255,0.1);
+                background-color: rgba(44, 37, 109, 0.17);
+            }
+
+            .date {
+                color: black;
+            }
+
+            .title, .date {
+                align-self: center;
             }
         }
     }
@@ -320,11 +400,24 @@ article,
     left: 0;
     right: 0;
     top: 0;
+    bottom: 0;       /* FIX: Anchor to bottom to ensure full height coverage */
     z-index: 0;
+    overflow: hidden; /* FIX: Cut off any video parts that stick out */
 
     video {
-        min-width: 100%;
+        /* FIX: Force video to match the container size exactly */
+        width: 100%;
+        height: 100%;
+
+        /* FIX: 'cover' ensures the video crops to fill the space
+           without distorting aspect ratio */
         object-fit: cover;
+
+        /* Optional: Center the video if cropped */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 
     .video-caption {
@@ -336,13 +429,16 @@ article,
         display: flex;
         justify-content: center;
 
+        /* Ensure caption sits on top of the video */
+        z-index: 1;
+
         h1 {
             align-self: center;
             color: white;
             font-size: 3.5rem;
             text-shadow: 0px 4px 4px rgba(0,0,0,0.5);
-            margin-left: 5rem;
-            margin-right: 5rem;
+            margin: 0 2rem; /* Adjusted margins for mobile safety */
+            text-align: center;
 
             @media screen and (max-width: @media-md-max) {
                 font-size: 2.5rem;
