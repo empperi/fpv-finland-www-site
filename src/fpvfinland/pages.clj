@@ -8,18 +8,25 @@
 
 (def ARTICLE_IMAGE_LEAD_CLASS "lead")
 
+(defn md->hiccup [md]
+  (if (string? md)
+    (cmh/markdown->hiccup md)
+    md))
+
 (defn apply-layout [markdown & [wrap-hiccup]]
   (base/with-layout
     (if (some? wrap-hiccup)
-      (conj wrap-hiccup (seq [(cmh/markdown->hiccup markdown)]))
-      (seq [(cmh/markdown->hiccup markdown)]))))
+      (conj wrap-hiccup (seq [(md->hiccup markdown)]))
+      (seq [(md->hiccup markdown)]))))
+
+(defn ->html5-page [html-str]
+  (str "<!DOCTYPE html>\n" html-str))
 
 (defn md-page [md-file-name]
-  (str
-  "<!DOCTYPE html>\n"
-  (apply-layout
-    (md/slurp-md-page md-file-name)
-    [:div.content-wrap])))
+  (->html5-page
+    (apply-layout
+      (md/slurp-md-page md-file-name)
+      [:div.content-wrap])))
 
 (defn article-date-elem [article]
   (let [[year month day] (str/split (:date article) #"[-]")]
@@ -61,12 +68,39 @@
   (and (vector? x)
        (= :p (first x))))
 
+(defn ->child-tag [x]
+  (first (second x)))
+
 (defn convert-lead-image [hiccup]
   (w/postwalk
     (fn [x]
       (if (and (img-tag? x)
                (str/starts-with? (:alt (second x)) "LEAD:"))
         (update x 1 assoc :class ARTICLE_IMAGE_LEAD_CLASS)
+        x))
+    hiccup))
+
+(defn convert-video [hiccup]
+  (w/postwalk
+    (fn [x]
+      (if (and (paragraph-tag? x)
+               (img-tag? (->child-tag x))
+               (str/starts-with? (:alt (second (->child-tag x))) "LEADVIDEO"))
+        (let [alt-txt      (-> x ->child-tag second :alt)
+              video-header (-> alt-txt (str/replace #"LEADVIDEO_[0-9]{1,4}[a-z]{2,}\:[ ]*(.*)" "$1"))
+              video-height (-> alt-txt (str/replace #"LEADVIDEO_([0-9]{1,4}[a-z]{2,})\:.*" "$1"))]
+          [:div {:class "video-space-reserve"
+                 :style {:height video-height}}
+           [:div {:class "lead-video"
+                  :style {:height video-height}}
+            [:div.video-caption [:h1 video-header]]
+            [:video {:autoplay                ""
+                     :muted                   ""
+                     :loop                    ""
+                     :disablePictureInPicture ""
+                     :style                   {:height video-height}}
+             [:source {:src  (-> x ->child-tag second :src)
+                       :type "video/mp4"}]]]])
         x))
     hiccup))
 
@@ -100,6 +134,15 @@
                (drop 2 hiccup)))
        (list date-elem
              hiccup))]))
+
+(defn enriched-md-page [md-file-name]
+  (->html5-page
+    (-> (md/slurp-md-page md-file-name)
+        cmh/markdown->hiccup
+        convert-lead-image
+        remove-empty-paragraphs-from-lead-images
+        convert-video
+        (apply-layout [:div.content-wrap]))))
 
 (defn create-article-pages []
   (->> (articles/get-articles)

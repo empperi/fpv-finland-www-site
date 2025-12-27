@@ -1,49 +1,85 @@
-/* CSS Media Query Breakpoints */
-/* Small devices (landscape phones, 576px and up) */
+/* ==========================================================================
+   1. VARIABLES & CONFIGURATION
+   ========================================================================== */
+
+/* Breakpoints */
 @media-sm-min: 576px;
 @media-sm-max: calc(@media-sm-min - 0.02px);
-/* Medium devices (tablets, 768px and up) */
 @media-md-min: 768px;
 @media-md-max: calc(@media-md-min - 0.02px);
-/* Large devices (desktops, 992px and up) */
 @media-lg-min: 992px;
 @media-lg-max: calc(@media-lg-min - 0.02px);
-/* X-Large devices (large desktops, 1200px and up) */
 @media-xl-min: 1200px;
 @media-xl-max: calc(@media-xl-min - 0.02px);
-/* XX-Large devices (larger desktops, 1400px and up) */
+@media-xxl-min: 1400px;
 @media-xxl-min: 1400px;
 @media-xxl-max: calc(@media-xxl-min - 0.02px);
 
+/* Dimensions */
 @header-height: 5rem;
-@header-z-index: 10;
+@article-page-width: 65rem;
+@search-width: 200px;
+@border-radius-amount: 0.8rem;
+
+/* Z-Indices */
+@z-header: 10;
+@z-search: @z-header + 2;
+@z-search-icon: @z-search - 1;
+@z-search-results: @z-search + 1;
+@z-lead-img: @z-header - 1;
+
+/* Colors */
+@col-bg-body: #f3f3f3;
+@col-bg-header: rgba(238, 238, 238, 0.8);
+@col-nav-hover: rgba(53, 87, 149, 0.8);
+@col-progress: #007bff;
+@col-shadow: rgba(0, 0, 0, 0.1);
+
+/* ==========================================================================
+   2. GLOBAL & TYPOGRAPHY
+   ========================================================================== */
 
 body {
     font-family: "Montserrat", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
     font-size: 14pt;
+    background-color: @col-bg-body;
+
+    @media screen and (max-width: @media-md-max) {
+        font-size: 12pt;
+    }
+}
+
+h1 {
+    font-size: 1.8rem;
+
+    @media screen and (max-width: @media-md-max) {
+        font-size: 1.4rem;
+    }
 }
 
 .hide {
     display: none !important;
 }
 
+/* ==========================================================================
+   3. HEADER & NAVIGATION
+   ========================================================================== */
+
 header {
     padding: 20px;
     position: fixed;
     width: 100%;
     height: @header-height;
-    background-color: rgba(238,238,238,0.8);
+    background-color: @col-bg-header;
     backdrop-filter: blur(10px);
-    z-index: @header-z-index;
-}
+    z-index: @z-header;
 
-main {
-    padding: 20px;
-    padding-top: calc(@header-height + 2rem);
-    display: flex;
-    justify-content: center;
+    /* Hide standard text links on mobile */
+    @media screen and (max-width: @media-md-max) {
+        .text-end { display: none; }
+    }
 }
 
 .nav-logo {
@@ -51,94 +87,151 @@ main {
 }
 
 .nav-link {
-    transition:
-      color 300ms,
-      background-color 300ms;
-    margin: -20px 0px -20px 0px;
-    padding: 30px 0px 30px 0px;
+    transition: color 300ms, background-color 300ms;
+    margin: -20px 0px;
+    padding: 30px 0px;
+
+    &:hover {
+        background-color: @col-nav-hover !important;
+        color: white !important;
+    }
 }
 
+.nav {
+    @media screen and (max-width: @media-md-max) {
+        display: none;
+    }
+}
+
+/* Mobile Burger Menu */
 .nav-burger {
     display: none;
-
     width: 50px;
-}
 
-.nav-burger-btn {
-    display: none;
-    border: 0px;
-    background: transparent;
-}
-
-.nav-burger-open {
-    font-size: 30px;
-    font-weight: 700;
-    display: inline-block;
-    width: 50px;
-}
-
-.nav-burger-list {
-    position: absolute;
-    list-style: none;
-    margin: 0;
-    background-color: white;
-    display: block;
-    top: calc(@header-height + 1rem);
-    text-align: right;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    height: 100vh;
-    font-size: 2rem;
-    line-height: 4rem;
-    padding-right: 2rem;
-}
-
-.search.burger {
-    display: none;
-}
-
-@media screen and (max-width: @media-md-max) {
-    .nav {
+    /* Uses & to create .nav-burger-btn (Standalone class) */
+    &-btn {
         display: none;
+        border: 0px;
+        background: transparent;
     }
 
-    .nav-burger {
+    /* Uses & to create .nav-burger-open (Standalone class) */
+    &-open {
+        font-size: 30px;
+        font-weight: 700;
+        display: inline-block;
+        width: 50px;
+    }
+
+    &-list {
+        position: absolute;
+        list-style: none;
+        margin: 0;
+        background-color: white;
         display: block;
+        top: calc(@header-height + 1rem);
+        text-align: right;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        height: 100vh;
+        font-size: 2rem;
+        line-height: 4rem;
+        padding-right: 2rem;
     }
 
-    .nav-burger-btn {
+    @media screen and (max-width: @media-md-max) {
         display: block;
-    }
 
-    header .text-end {
-        display: none;
-    }
-
-    .search.burger {
-        display: blocK;
-    }
-
-    .search.full-page {
-        display: none;
+        &-btn {
+            display: block;
+        }
     }
 }
 
-.nav-link:hover {
-    background-color: rgba(53,87,149,0.8) !important;
-    color: white !important;
-}
+/* ==========================================================================
+   4. SEARCH COMPONENT
+   ========================================================================== */
 
 .search {
     position: relative;
-    z-index: @header-z-index + 2;
+    z-index: @z-search;
+
+    /* Logic for showing search in burger menu vs full page */
+    &.burger { display: none; }
+
+    @media screen and (max-width: @media-md-max) {
+        &.burger { display: block; }
+        &.full-page { display: none; }
+    }
+
+    .search-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        height: 2.5rem;
+    }
+
+    /* Used as click target for js-logic when clearing input field if clicking outside
+       of actual search area */
+    .search-click-target {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .search-input {
+        position: absolute;
+        top: 0;
+        right: 0;
+        border: 2px solid @col-shadow;
+        padding: 0.5rem;
+        opacity: 0;
+        transition: width 0.4s ease, opacity 0.3s ease;
+        cursor: pointer;
+        width: 2.5rem;
+        font-size: 0.8rem;
+        z-index: @z-search;
+        box-shadow: 1px 5px 5px rgba(0,0,0,0.3);
+        border-radius: 5px;
+
+        &:focus {
+            outline: none;
+            opacity: 1;
+            cursor: text;
+            width: @search-width;
+        }
+    }
+
+    .search-input:hover + .search-icon {
+        opacity: 1;
+    }
+
+    .search-input:focus + .search-icon {
+        opacity: 0;
+    }
+
+    .search-icon {
+        background: white;
+        padding-left: 0.6rem;
+        padding-top: 0.6rem;
+        border-radius: 8px;
+        border: 2px solid rgba(0,0,0,0.5);
+        opacity: 0.5;
+        z-index: @z-search-icon;
+        transition: opacity 0.3s ease;
+    }
 }
 
 .search-results {
     background: white;
-    padding: 1rem;
     box-shadow: 1px 3px 6px rgba(0, 0, 0, 0.5);
     position: absolute;
+    right: 0;
+    width: @search-width;
+    z-index: @z-search-results;
 
     ul {
         list-style: none;
@@ -148,22 +241,41 @@ main {
     .search-result {
         margin-top: 0.5rem;
         font-size: 0.9rem;
+        border-bottom: 1px solid rgba(0,0,0,0.3);
+
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        a {
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            padding: 0.2rem 0.5rem;
+
+            &:hover {
+                background-color: rgba(0,0,255,0.1);
+            }
+        }
     }
 }
+
+/* ==========================================================================
+   5. PROGRESS BAR
+   ========================================================================== */
 
 .progress-container {
     position: fixed;
     top: @header-height;
-    //z-index: @header-z-index + 1;
     left: 0;
     width: 100%;
-    height: 5px; /* Height of the bar */
-    background: #ccc; /* Background for the track */
+    height: 5px;
+    background: #ccc;
 }
 
 .progress-bar {
     height: 100%;
-    background: #007bff; /* Color of the progress fill */
+    background: @col-progress;
     animation-name: progress-width;
     animation-duration: 1s;
     animation-timing-function: linear;
@@ -175,16 +287,83 @@ main {
     to { width: 100%; }
 }
 
-article {
-    max-width: 65rem;
-}
+/* ==========================================================================
+   6. LAYOUT CONTAINERS
+   ========================================================================== */
 
+/* Shared styles for article and content wrappers */
+article,
 .content-wrap {
-    max-width: 65rem;
+    background-color: white;
+    box-shadow: 0px 8px 5px @col-shadow;
+    min-height: 100vh;
+    padding: 20px;
+    padding-top: calc(@header-height + 2rem);
+    margin-left: auto;
+    margin-right: auto;
+
+    @media screen and (min-width: @article-page-width) {
+        width: @article-page-width;
+    }
 }
 
-.article-lead .article-date {
-    color: white;
+/* ==========================================================================
+   7. VIDEO HERO SECTION
+   ========================================================================== */
+
+.video-space-reserve {
+    margin-bottom: ~"-@{header-height}";
+}
+
+.lead-video {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 0;
+
+    video {
+        min-width: 100%;
+        object-fit: cover;
+    }
+
+    .video-caption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: @header-height;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+
+        h1 {
+            align-self: center;
+            color: white;
+            font-size: 3.5rem;
+            text-shadow: 0px 4px 4px rgba(0,0,0,0.5);
+            margin-left: 5rem;
+            margin-right: 5rem;
+
+            @media screen and (max-width: @media-md-max) {
+                font-size: 2.5rem;
+            }
+        }
+    }
+}
+
+/* ==========================================================================
+   8. ARTICLE COMPONENTS
+   ========================================================================== */
+
+.article-lead {
+    background: linear-gradient(110deg, rgb(50, 50, 205), rgb(150, 150, 205));
+    padding: 2rem 2rem 0 2rem;
+    border-radius: @border-radius-amount;
+    margin-bottom: 5rem;
+
+    h1, .article-date {
+        color: white;
+    }
 }
 
 .article-links {
@@ -195,32 +374,20 @@ article {
     justify-content: space-between;
 }
 
-.article-link a {
-    display: flex;
-    gap: 3rem;
-}
+.article-link {
+    a {
+        display: flex;
+        gap: 3rem;
+    }
 
-.article-link .article-date {
-    width: 5rem;
-}
-
-@border-radius-amount: 0.8rem;
-
-.article-lead {
-    background: linear-gradient(110deg, rgb(50, 50, 205), rgb(150, 150, 205));
-    padding: 2rem 2rem 0 2rem;
-    border-radius: @border-radius-amount;
-
-    margin-bottom: 5rem;
-}
-
-.article-lead h1 {
-    color: white;
+    .article-date {
+        width: 5rem;
+    }
 }
 
 img.lead {
     position: relative;
-    z-index: calc(@header-z-index - 1);
+    z-index: @z-lead-img;
     top: 2rem;
     width: 100%;
     border-radius: @border-radius-amount;

@@ -32,14 +32,13 @@
     [:script {:type "text/javascript" :src "/script/scripts.js"}]]
 
    [:body
-    [:header {:class "d-flex flex-wrap align-items-center justify-content-between justify-content-md-between py-3 mb-4 border-bottom"}
+    [:header {:class "d-flex align-items-center justify-content-between py-3 mb-4 border-bottom"}
      [:div {:class "col-md-3 mb-2 mb-md-0"}
       [:img {:src "/img/fpv-finland-logo.png"
              :alt "FPV Finland"
              :class "nav-logo"}]]
      (nav/nav)
-     (search/search-input "full-page")
-     [:div {:class "col-md-3 text-end"}]]]
+     (search/search-input "full-page")]]
    [:main content]])
 
 (defn with-layout [& page-content]

@@ -66,9 +66,12 @@
 
 (defn search-input [& extra-classes]
   [:div {:class (vec (conj extra-classes "search"))}
-   [:input.search-input {:type "text"
-                         :placeholder "Hae..."
-                         :name "search"}]
+   [:div.search-click-target.hide]
+   [:div.search-wrapper
+    [:input.search-input {:type "text"
+                          :placeholder "Hae..."
+                          :name "search"}]
+    [:img.search-icon {:src "/img/search.svg"}]]
    [:div.search-results.hide
     [:ul
      [:li.search-result-template.search-result.hide

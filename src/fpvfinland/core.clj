@@ -21,7 +21,7 @@
 (defn get-pages
   "Returns a map of URL path to page content (or a function to generate content)."
   []
-  (->> (merge {"/" (pages/md-page "main.md")}
+  (->> (merge {"/" (pages/enriched-md-page "main.md")}
               {"/yhdistys.html" (pages/md-page "yhdistys.md")}
               {"/yhteystiedot.html" (pages/md-page "yhteystiedot.md")}
 
@@ -29,7 +29,7 @@
        ;; Create all URL mappings for articles
        (apply merge (pages/create-article-pages))
        ;; Slurp any static files in the resources/public directory
-       (merge (stasis/slurp-directory "resources/public" #".*\.(html|css|js|jpg|png|gif)$"))))
+       (merge (stasis/slurp-directory "resources/public" #".*\.(html|css|js|jpg|png|gif|mp4)$"))))
 
 
 ;; ----------------------------------------
@@ -39,7 +39,8 @@
 (defn get-assets []
   (assets/load-assets "public" ["/styles/styles.less"
                                 #"/img/.*\.png"
-                                #"/img/.*\.svg"]))
+                                #"/img/.*\.svg"
+                                #"/video/.*\.mp4"]))
 
 (def app
   "The Ring handler for development. It serves dynamic pages, then static files."

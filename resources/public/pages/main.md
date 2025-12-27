@@ -1,3 +1,5 @@
+![LEADVIDEO_420px: YHDISTYS FPV HARRASTAJILLE](/video/droonimedia-html-intro.mp4)
+
 FPV Finland on rekisteröity yhdistys joka edistää FPV (First Person View) harrastusta Suomessa. 
 Yhdistys on perustettu vuonna 2017.
 
