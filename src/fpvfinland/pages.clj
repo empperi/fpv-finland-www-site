@@ -98,6 +98,7 @@
                      :muted                   ""
                      :loop                    ""
                      :disablePictureInPicture ""
+                     :playsInline             ""
                      :style                   {:height video-height}}
              [:source {:src  (-> x ->child-tag second :src)
                        :type "video/mp4"}]]]])
