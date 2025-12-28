@@ -2,7 +2,8 @@
   (:require [hiccup2.core :as h]
 
             [fpvfinland.layout.nav :as nav]
-            [fpvfinland.layout.search :as search]))
+            [fpvfinland.layout.search :as search]
+            [fpvfinland.layout.analytics :as analytics]))
 
 (defn opengraph []
   (seq [[:meta {:property "og:title" :content "FPV Finland Ry"}]
@@ -25,6 +26,7 @@
                        "&display=swap") :rel "stylesheet"}]
     [:link {:href "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" :rel "stylesheet" :integrity "sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" :crossorigin "anonymous"}]
     (opengraph)
+    (analytics/analytics)
     [:link {:rel "stylesheet" :href "/styles/styles.css"}]
     [:script {:type "text/javascript"}
      (h/raw (str "const searchDatabase = " (search/memoized-search-json)))]
