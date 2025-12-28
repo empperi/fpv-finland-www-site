@@ -1,5 +1,7 @@
 (ns fpvfinland.core
-  (:require [stasis.core :as stasis]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [stasis.core :as stasis]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.content-type :refer [wrap-content-type]]
@@ -22,10 +24,7 @@
 (defn get-pages
   "Returns a map of URL path to page content (or a function to generate content)."
   []
-  (->> (merge {"/" (pages/enriched-md-page "main.md")}
-              {"/yhdistys.html" (pages/md-page "yhdistys.md")}
-              {"/yhteystiedot.html" (pages/md-page "yhteystiedot.md")}
-
+  (->> (merge (pages/create-main-navigation-pages)
               {"/artikkelit/" (pages/article-list-page)})
        ;; Create all URL mappings for articles
        (apply merge (pages/create-article-pages))

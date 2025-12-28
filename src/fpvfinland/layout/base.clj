@@ -1,7 +1,5 @@
 (ns fpvfinland.layout.base
   (:require [hiccup2.core :as h]
-
-            [fpvfinland.layout.nav :as nav]
             [fpvfinland.layout.search :as search]
             [fpvfinland.layout.analytics :as analytics]))
 
@@ -12,7 +10,7 @@
         [:meta {:property "og:locale" :content "fi_FI"}]
         [:meta {:property "og:description" :content "FPV Finland on FPV-dronetoimintaa edistävä yhdistys"}]]))
 
-(defn layout [content]
+(defn layout [content nav-content]
   [:html
    [:head
     [:meta {:charset "utf-8"}]
@@ -40,9 +38,9 @@
        [:img {:src "/img/fpv-finland-logo.png"
               :alt "FPV Finland"
               :class "nav-logo"}]]]
-     (nav/nav)
+     nav-content
      (search/search-input "full-page")]]
    [:main content]])
 
-(defn with-layout [& page-content]
-  (str (h/html (layout page-content))))
+(defn with-layout [nav-content & page-content]
+  (str (h/html (layout page-content nav-content))))

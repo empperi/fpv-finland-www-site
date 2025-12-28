@@ -3,10 +3,15 @@
             [clojure.walk :as w]
             [commonmark-hiccup.core :as cmh]
             [fpvfinland.articles :as articles]
+            [fpvfinland.files :as files]
             [fpvfinland.md-resources :as md]
+            [fpvfinland.layout.nav :as nav]
             [fpvfinland.layout.base :as base]))
 
 (def ARTICLE_IMAGE_LEAD_CLASS "lead")
+
+(defn with-layout [& page-content]
+  (apply base/with-layout (nav/nav) page-content))
 
 (defn md->hiccup [md]
   (if (string? md)
@@ -14,7 +19,7 @@
     md))
 
 (defn apply-layout [markdown & [wrap-hiccup]]
-  (base/with-layout
+  (with-layout
     (if (some? wrap-hiccup)
       (conj wrap-hiccup (seq [(md->hiccup markdown)]))
       (seq [(md->hiccup markdown)]))))
@@ -44,7 +49,7 @@
                                (article-date-elem article)
                                [:span.article-title (:title article)]]])
                            articles)]
-    (base/with-layout
+    (with-layout
       [:div.content-wrap.article-list
        [:h3 "FPV Finlandin julkaistut artikkelit aikajärjestyksessä"]
        [:ul.article-links article-links]])))
@@ -153,5 +158,14 @@
                                                    convert-lead-image
                                                    remove-empty-paragraphs-from-lead-images
                                                    (wrap-as-readable-article article)
-                                                   base/with-layout)}))
+                                                   with-layout)}))
        (apply merge)))
+
+(defn create-main-navigation-pages []
+  (->> (for [file (files/list-files "./resources/public/pages")]
+         (let [file-name (.getName file)]
+           (if (= "main.md" file-name)
+             ["/" (enriched-md-page file-name)]
+             [(format "/%s.html" (str/replace file-name ".md" "")) (enriched-md-page file-name)])))
+       (into {})
+       (apply merge (create-article-pages))))

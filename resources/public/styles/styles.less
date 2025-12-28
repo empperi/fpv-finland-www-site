@@ -5,7 +5,7 @@
 /* Breakpoints */
 @media-sm-min: 576px;
 @media-sm-max: calc(@media-sm-min - 0.02px);
-@media-md-min: 768px;
+@media-md-min: 845px;
 @media-md-max: calc(@media-md-min - 0.02px);
 @media-lg-min: 992px;
 @media-lg-max: calc(@media-lg-min - 0.02px);
@@ -97,18 +97,19 @@ header {
         color: white !important;
     }
 
-    @media screen and (max-width: @media-lg-max) {
+    @media screen and (max-width: @media-xl-max) {
         font-size: 1rem;
         padding-right: 0.6rem !important;
         padding-left: 0.6rem !important;
     }
 
-    @media screen and (max-width: @media-md-max) {
-        font-size: 1.8rem;
+    @media screen and (max-width: @media-lg-max) {
+        font-size: 0.9rem;
         text-align: center;
         padding-right: 0.6rem !important;
         padding-left: 0.6rem !important;
     }
+
 }
 
 .nav {

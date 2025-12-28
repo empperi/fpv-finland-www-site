@@ -30,8 +30,7 @@
          (filter not-empty)
          (map stemmer)
          (filter (every-pred finnish-stopwords-pred #(> (count %) 2)))
-         distinct)
-    #_(group-by identity content-words)))
+         distinct)))
 
 (defn create-search-database []
   (let [today-str (.format (LocalDateTime/now) DateTimeFormatter/ISO_DATE)]
@@ -44,6 +43,10 @@
         :date  today-str
         :link  "/yhdistys.html"
         :stems (stem-md-content (md/slurp-md-page "yhdistys.md"))}
+       {:title "Tapahtumat"
+        :date  today-str
+        :link  "/tapahtumat.html"
+        :stems (stem-md-content (md/slurp-md-page "tapahtumat.md"))}
        {:title "Yhteystiedot"
         :date  today-str
         :link  "/yhteystiedot.html"
