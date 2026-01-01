@@ -1,7 +1,5 @@
 (ns fpvfinland.core
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [stasis.core :as stasis]
+  (:require [stasis.core :as stasis]
             [ring.adapter.jetty :as jetty]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.content-type :refer [wrap-content-type]]
@@ -15,7 +13,8 @@
             [optimus-less.core]
 
             [fpvfinland.pages :as pages]
-            [fpvfinland.layout.analytics :as analytics]))
+            [fpvfinland.layout.analytics :as analytics]
+            [fpvfinland.resource-files :as res-files]))
 
 ;; ----------------------------------------
 ;; 1. Page Definitions
@@ -29,7 +28,7 @@
        ;; Create all URL mappings for articles
        (apply merge (pages/create-article-pages))
        ;; Slurp any static files in the resources/public directory
-       (merge (stasis/slurp-directory "resources/public" #".*\.(html|css|js|jpg|png|gif|mp4)$"))))
+       (merge (stasis/slurp-directory "resources/public" (res-files/resource-file-types-as-regexp)))))
 
 
 ;; ----------------------------------------

@@ -1,7 +1,24 @@
 (ns fpvfinland.layout.base
-  (:require [hiccup2.core :as h]
+  (:require [clojure.string :as str]
+            [clojure.walk :as w]
+            [fpvfinland.resource-files :as res-files]
+            [hiccup2.core :as h]
             [fpvfinland.layout.search :as search]
             [fpvfinland.layout.analytics :as analytics]))
+
+(def COMPILE_TIMESTAMP (System/currentTimeMillis))
+
+(defn add-resource-timestamps [hiccup]
+  (let [res-set (set (map name (filter #(not= :html %) res-files/resource-file-types)))
+        extract-attr-resource-type (fn [x]
+                                     (when (string? x)
+                                       (res-set (last (str/split (str/lower-case x) #"\.")))))]
+    (w/postwalk
+      (fn [x]
+        (if (extract-attr-resource-type x)
+          (str x "?t=" COMPILE_TIMESTAMP)
+          x))
+      hiccup)))
 
 (defn opengraph []
   (seq [[:meta {:property "og:title" :content "FPV Finland Ry"}]
@@ -43,4 +60,4 @@
    [:main content]])
 
 (defn with-layout [nav-content & page-content]
-  (str (h/html (layout page-content nav-content))))
+  (str (h/html (add-resource-timestamps (layout page-content nav-content)))))
