@@ -27,8 +27,12 @@
               {"/artikkelit/" (pages/article-list-page)})
        ;; Create all URL mappings for articles
        (apply merge (pages/create-article-pages))
-       ;; Slurp any static files in the resources/public directory
-       (merge (stasis/slurp-directory "resources/public" (res-files/resource-file-types-as-regexp)))))
+       ;; Slurp any static text files in the resources/public directory
+       (merge (stasis/slurp-directory "resources/public"
+                                      (res-files/resource-file-types-as-regexp res-files/text-resource-file-types)))
+       ;; Maps all binary resources in resources/public directory
+       (merge (res-files/directory-files "resources/public"
+                                         (res-files/resource-file-types-as-regexp res-files/binary-resource-file-types)))))
 
 
 ;; ----------------------------------------
@@ -37,8 +41,8 @@
 
 (defn get-assets []
   (assets/load-assets "public" ["/styles/styles.less"
-                                #"/img/.*\.png"
                                 #"/img/.*\.svg"
+                                #"/img/.*\.png"
                                 #"/video/.*\.mp4"]))
 
 (def app
