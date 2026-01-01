@@ -8,6 +8,10 @@ jobs:
   build_and_preview:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
+    env:
+      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF8"
+      LANG: "en_US.UTF-8"
+      LC_ALL: "en_US.UTF-8"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
