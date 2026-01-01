@@ -6,7 +6,8 @@
             [fpvfinland.files :as files]
             [fpvfinland.md-resources :as md]
             [fpvfinland.layout.nav :as nav]
-            [fpvfinland.layout.base :as base]))
+            [fpvfinland.layout.base :as base]
+            [fpvfinland.plugins.plugins :as plugins]))
 
 (def ARTICLE_IMAGE_LEAD_CLASS "lead")
 
@@ -141,6 +142,16 @@
        (list date-elem
              hiccup))]))
 
+(defn apply-plugins [hiccup]
+  (w/postwalk
+    (fn [x]
+      (if-let [plugin-fn (and (vector? x)
+                              (= :p (first x))
+                              (plugins/match-plugin (first (second x))))]
+        (plugin-fn)
+        x))
+    hiccup))
+
 (defn enriched-md-page [md-file-name]
   (->html5-page
     (-> (md/slurp-md-page md-file-name)
@@ -148,6 +159,7 @@
         convert-lead-image
         remove-empty-paragraphs-from-lead-images
         convert-video
+        apply-plugins
         (apply-layout [:div.content-wrap]))))
 
 (defn create-article-pages []

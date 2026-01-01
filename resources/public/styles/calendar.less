@@ -1,0 +1,183 @@
+/* =========================================
+   1. Breakpoints
+   ========================================= */
+@media-sm-min: 576px;
+@media-sm-max: calc(@media-sm-min - 0.02px);
+@media-md-min: 845px;
+@media-md-max: calc(@media-md-min - 0.02px);
+@media-lg-min: 992px;
+@media-lg-max: calc(@media-lg-min - 0.02px);
+// ... added others for completeness if needed
+
+@primary-color: #0f2133;
+@accent-color: #3498db;
+@bg-hover: f8f9fa;
+
+/* =========================================
+   2. Main Styles
+   ========================================= */
+
+.calendar-container {
+  /* Make width fluid, but cap it at larger sizes */
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: @primary-color;
+  color: white;
+
+  /* Reduce padding on mobile */
+  @media (max-width: @media-sm-max) {
+    padding: 15px 10px;
+  }
+
+  button {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 5px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+  }
+
+  h2 {
+    margin: 0;
+    /* Scale font down slightly on mobile */
+    font-size: 1.2rem;
+    @media (max-width: @media-sm-max) {
+      font-size: 1rem;
+    }
+  }
+}
+
+.calendar-grid-header, .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-grid-header {
+  background-color: #eee;
+  padding: 10px 0;
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #666;
+
+  /* On very small screens, shrink font to fit 'Mon/Tue' */
+  @media (max-width: @media-sm-max) {
+    font-size: 0.75rem;
+    padding: 5px 0;
+  }
+}
+
+.calendar-grid {
+  .day {
+    /* Responsive Height: Tall on desktop, compact on mobile */
+    min-height: 120px;
+    padding: 10px;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    background: white;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    @media (max-width: @media-md-max) {
+      min-height: 80px; /* Tablet height */
+    }
+
+    @media (max-width: @media-sm-max) {
+      min-height: 50px; /* Mobile height - very compact */
+      padding: 5px;
+    }
+
+    &:nth-child(7n) {
+      border-right: none;
+    }
+
+    &:hover {
+      background-color: @bg-hover;
+    }
+
+    &.today {
+      background-color: lighten(#3498db, 40%);
+    }
+
+    &.other-month {
+      color: #ccc;
+      background-color: #fafafa;
+    }
+
+    .date-number {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+
+      @media (max-width: @media-sm-max) {
+        font-size: 0.8rem;
+        margin-bottom: 2px;
+      }
+    }
+
+    /* =========================================
+       The Responsive Event Indicators
+       ========================================= */
+    .event-dot {
+      background-color: @accent-color;
+      color: white;
+      margin-top: 2px;
+
+      /* DESKTOP VIEW (Default): Full text bars */
+      display: block;
+      font-size: 0.75rem;
+      padding: 2px 4px;
+      border-radius: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      /* MOBILE/TABLET VIEW: Switch to "Dot" style */
+      @media (max-width: @media-md-max) {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%; /* Make it a circle */
+        padding: 0;
+        text-indent: -9999px; /* Hide text */
+        margin-right: 3px; /* Space between multiple dots */
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+/* Modal is already mobile-friendly but let's ensure max-width is safe */
+.event-details {
+  max-width: 800px;
+  width: 90%; /* Prevent touching edges on mobile */
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-sizing: border-box; /* Vital for responsive padding */
+
+  &.hidden {
+    display: none;
+  }
+}

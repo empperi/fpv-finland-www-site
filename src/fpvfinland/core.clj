@@ -40,7 +40,7 @@
 ;; ----------------------------------------
 
 (defn get-assets []
-  (assets/load-assets "public" ["/styles/styles.less"
+  (assets/load-assets "public" [#"/styles/.*\.less"
                                 #"/img/.*\.svg"
                                 #"/img/.*\.png"
                                 #"/video/.*\.mp4"]))
