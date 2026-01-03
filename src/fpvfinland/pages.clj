@@ -147,7 +147,7 @@
     (fn [x]
       (if-let [plugin-fn (and (vector? x)
                               (= :p (first x))
-                              (plugins/match-plugin (first (second x))))]
+                              (plugins/build-plugin (first (second x))))]
         (plugin-fn)
         x))
     hiccup))

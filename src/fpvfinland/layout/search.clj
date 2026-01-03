@@ -26,7 +26,7 @@
                           (str/lower-case)
                           (str/split #" "))]
     (->> content-words
-         (map #(str/replace % #".*?([a-zA-ZäÄöÖåÅ]*).*" "$1"))
+         (map #(str/replace % #".*?([a-zA-ZäÄöÖåÅ0-9]*).*" "$1"))
          (filter not-empty)
          (map stemmer)
          (filter (every-pred finnish-stopwords-pred #(> (count %) 2)))

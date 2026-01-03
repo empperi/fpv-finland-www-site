@@ -1,6 +1,8 @@
 ![LEADVIDEO_420px: YHDISTYS FPV HARRASTAJILLE](/video/droonimedia-html-intro.mp4)
 
-FPV Finland on rekisteröity yhdistys joka edistää FPV (First Person View) harrastusta Suomessa. 
+# Mikä FPV Finland?
+
+**FPV Finland** on rekisteröity yhdistys joka edistää FPV (First Person View) harrastusta Suomessa. 
 Yhdistys on perustettu vuonna 2017.
 
 Iso osa toimintaa on Drone Racing tapahtumien järjestäminen eri puolilla Suomea. Yhdistys on 

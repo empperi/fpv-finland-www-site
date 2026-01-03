@@ -79,6 +79,10 @@ h1, h2, h3 {
     margin-bottom: 1.5rem;
 }
 
+h2 {
+    margin-top: 3rem;
+}
+
 h3 {
     font-size: 1.5rem;
     position: relative;
@@ -786,4 +790,47 @@ img.lead {
     width: 100%;
     border-radius: @border-radius-amount;
     box-shadow: 15px 15px 9px rgb(100, 100, 100);
+}
+
+/* =========================================
+   9. UI ELEMENTS (BUTTONS)
+   ========================================= */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 1rem 3rem;
+    margin: 1rem 2rem 0rem;
+    min-width: 200px;
+
+    background-color: @col-accent;
+    background-image: linear-gradient(135deg, @col-accent, lighten(@col-accent, 15%));
+
+    border-radius: 15px;
+    border: none;
+
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: white !important;
+    text-decoration: none;
+
+    box-shadow: 0 4px 15px rgba(53, 87, 149, 0.4);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(53, 87, 149, 0.6);
+        background-image: linear-gradient(135deg, lighten(@col-accent, 5%), lighten(@col-accent, 20%));
+    }
+
+    &:active {
+        transform: translateY(-1px) scale(0.98);
+        box-shadow: 0 4px 10px rgba(53, 87, 149, 0.4);
+    }
 }
