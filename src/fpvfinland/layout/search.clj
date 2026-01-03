@@ -71,7 +71,7 @@
   [:div {:class (vec (conj extra-classes "search"))}
    [:div.search-click-target.hide]
    [:div.search-wrapper
-    [:input.search-input {:type "text"
+    [:input.search-input {:type "search"
                           :placeholder "Hae..."
                           :name "search"}]
     [:img.search-icon {:src "/img/search.svg"}]]

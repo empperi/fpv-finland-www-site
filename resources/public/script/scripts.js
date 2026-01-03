@@ -60,7 +60,6 @@ const hideSearchresults = (inputElem) => {
     const searchResultsElem = searchParent.querySelector('.search-results');
     const searchClickTargetElem = searchParent.querySelector('.search-click-target')
 
-
     searchClickTargetElem.classList.add('hide');
     searchResultsElem.classList.add('hide');
     const currentLiveResults = searchResultsElem.querySelectorAll('.live');
@@ -119,7 +118,7 @@ const bindUserSearch = (inputElem) => {
     const searchParent = findParentWithClass(inputElem, 'search');
     const searchClickTargetElem = searchParent.querySelector('.search-click-target');
 
-    inputElem.addEventListener("keydown", (event) => {
+    inputElem.addEventListener("input", (event) => {
         // wait until value is applied
         setTimeout(() => {
             const value = inputElem.value;
@@ -145,6 +144,7 @@ const bindUserSearch = (inputElem) => {
     });
 
     searchClickTargetElem.addEventListener("click", (event) => {
+        inputElem.value = '';
         hideSearchresults(inputElem);
     });
 };
