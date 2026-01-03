@@ -29,35 +29,69 @@
 @z-lead-img: @z-header - 1;
 
 /* Colors */
-@col-bg-body: #f3f3f3;
-@col-bg-header: rgba(238, 238, 238, 0.8);
+@col-bg-body: #f5f5f5; /* Slightly cleaner grey */
+@col-bg-header: rgba(255, 255, 255, 0.9); /* Cleaner white for backdrop */
 @col-nav-hover: rgba(53, 87, 149, 0.8);
 @col-progress: #007bff;
 @col-shadow: rgba(0, 0, 0, 0.1);
+@col-text-main: #2c3e50;
+@col-text-muted: #6c757d;
+@col-accent: #355795; /* Derived from your nav hover */
+
+@shadow-soft: 0 4px 20px rgba(0,0,0,0.05);
+@shadow-hover: 0 10px 25px rgba(0,0,0,0.1);
 
 /* ==========================================================================
    2. GLOBAL & TYPOGRAPHY
    ========================================================================== */
 
 
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+}
+
 body {
     font-family: "Montserrat", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-    font-size: 14pt;
+    color: @col-text-main;
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
     background-color: @col-bg-body;
 
-    @media screen and (max-width: @media-md-max) {
-        font-size: 12pt;
+    /* Technical Dot Pattern */
+    background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1.5px, transparent 1.5px);
+    background-size: 12px 12px;
+    background-attachment: fixed;
+}
+
+h1, h2, h3 {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    color: @col-text-main;
+    margin-bottom: 1.5rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+    position: relative;
+    padding-bottom: 1rem;
+
+    /* Adds a subtle underline decoration to section titles */
+    &:after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 4px;
+        background: @col-accent;
+        margin-top: 0.5rem;
+        border-radius: 2px;
     }
 }
 
-h1 {
-    font-size: 1.8rem;
-
-    @media screen and (max-width: @media-md-max) {
-        font-size: 1.4rem;
-    }
+a {
+    color: inherit;
 }
 
 .hide {
@@ -69,13 +103,16 @@ h1 {
    ========================================================================== */
 
 header {
-    padding: 20px;
+    padding: 0 20px;
     position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
     height: @header-height;
     background-color: @col-bg-header;
     backdrop-filter: blur(10px);
     z-index: @z-header;
+    box-sizing: border-box;
 
     /* Hide standard text links on mobile */
     @media screen and (max-width: @media-md-max) {
@@ -119,52 +156,111 @@ header {
 }
 
 /* Mobile Burger Menu */
+img.nav-burger {
+    width: 40px;
+    height: auto;
+    display: block;
+}
+
 .nav-burger {
     display: none;
-    width: 50px;
+    align-items: center;
+    height: 100%;
 
-    /* Uses & to create .nav-burger-btn (Standalone class) */
     &-btn {
-        display: none;
-        border: 0px;
+        display: none; /* Hidden on Desktop */
         background: transparent;
-    }
-
-    /* Uses & to create .nav-burger-open (Standalone class) */
-    &-open {
-        font-size: 30px;
-        font-weight: 700;
-        display: inline-block;
-        width: 50px;
-    }
-
-    &-list {
-        position: absolute;
+        border: none;
+        padding: 0;
         margin: 0;
-        background-color: white;
-        display: block;
-        top: calc(@header-height);
-        text-align: right;
-        right: 0;
-        left: 0;
-        bottom: 0;
-        height: 100vh;
-        font-size: 2rem;
-        line-height: 4rem;
+        cursor: pointer;
 
-        ul {
-            list-style: none;
-            margin-top: 1.5rem;
-            padding: 0;
+        z-index: @z-header + 5;
+
+        height: 100%;
+        align-items: center;
+
+        @media screen and (max-width: @media-md-max) {
+            display: flex;
         }
     }
 
-    @media screen and (max-width: @media-md-max) {
+    /* The 'X' Close Icon */
+    &-open {
+        font-family: "Montserrat", sans-serif;
+        font-weight: 300;
+        font-size: 2.5rem;
+        color: @col-text-main;
+        line-height: 1;
         display: block;
+        width: 40px;
+        text-align: center;
+    }
+
+    /* THE MENU CONTAINER */
+    &-list {
+         position: fixed;
+         top: @header-height;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         height: calc(100vh - @header-height);
+
+         background-color: rgba(255, 255, 255, 0.98);
+         backdrop-filter: blur(15px);
+         -webkit-backdrop-filter: blur(15px);
+
+         z-index: @z-header;
+
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         padding-top: 2rem;
+         animation: menuSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+         ul {
+             list-style: none;
+             padding: 0;
+             margin: 2rem 0 0 0;
+             width: 100%;
+             text-align: center;
+
+             li a {
+                 display: block;
+                 font-family: "Poppins", sans-serif;
+                 font-weight: 600;
+                 font-size: 1.5rem;
+                 color: @col-text-main;
+                 padding: 1rem 0;
+
+                 &:active {
+                     color: @col-accent;
+                     background: rgba(0,0,0,0.03);
+                 }
+             }
+         }
+    }
+
+    @media screen and (max-width: @media-md-max) {
+        display: flex;
 
         &-btn {
             display: block;
         }
+    }
+}
+
+/* =========================================
+   Animation Keyframes
+   ========================================= */
+@keyframes menuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -176,7 +272,6 @@ header {
     position: relative;
     z-index: @z-search;
 
-    /* Logic for showing search in burger menu vs full page */
     &.burger { display: none; }
 
     @media screen and (max-width: @media-md-max) {
@@ -184,7 +279,6 @@ header {
         &.full-page { display: none; }
     }
 
-    /* full-page styling for normal search component */
     &.full-page {
         .search-wrapper {
             position: relative;
@@ -247,20 +341,41 @@ header {
     }
 
     &.burger {
+        width: 80%;
+        max-width: 350px;
+        margin-bottom: 2rem;
+
         .search-wrapper {
             display: flex;
-            flex-wrap: nowrap;
-            justify-content: space-between;
             align-items: center;
-            box-shadow: 0px 4px 4px rgba(0,0,0,0.2);
+            flex-wrap: nowrap;
 
-            border: 1px solid rgba(0,0,0,0.5);
+            background: transparent;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+            border-radius: 0;
+            padding: 0.5rem 0;
+            box-shadow: none !important;
+
+            transition: border-color 0.3s;
+
+            &:focus-within {
+                border-bottom-color: @col-accent; /* Highlight when typing */
+            }
 
             input {
-                border: 0;
-                font-size: 1.5rem;
-                padding-left: 1rem;
-                padding-right: 1rem;
+                border: none;
+                background: transparent;
+                font-family: "Poppins", sans-serif;
+                font-size: 1.2rem;
+                color: @col-text-main;
+                width: 100%;
+                padding: 0;
+
+                &::placeholder {
+                    color: @col-text-muted;
+                    font-weight: 300;
+                    opacity: 0.6;
+                }
 
                 &:focus {
                     outline: none;
@@ -268,13 +383,10 @@ header {
             }
 
             .search-icon {
-                height: 4rem;
-                background: white;
-                padding-left: 0.6rem;
-                padding-top: 0.6rem;
-                border-radius: 8px;
-                z-index: @z-search-icon;
-                transition: opacity 0.3s ease;
+                width: 1.5rem;
+                opacity: 0.4;
+                padding: 0;
+                margin-left: 10px;
             }
         }
     }
@@ -334,9 +446,15 @@ header {
                 color: black;
             }
 
-            .title, .date {
+            .title {
+                text-align: left;
                 align-self: center;
             }
+
+            .date {
+                align-self: flex-start;
+            }
+
         }
     }
 }
@@ -351,12 +469,14 @@ header {
     left: 0;
     width: 100%;
     height: 5px;
-    background: #ccc;
+    background: transparent;
+    z-index: @z-header + 10;
 }
 
 .progress-bar {
     height: 100%;
     background: @col-progress;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     animation-name: progress-width;
     animation-duration: 1s;
     animation-timing-function: linear;
@@ -372,19 +492,28 @@ header {
    6. LAYOUT CONTAINERS
    ========================================================================== */
 
-/* Shared styles for article and content wrappers */
 article,
 .content-wrap {
     background-color: white;
-    box-shadow: 0px 8px 5px @col-shadow;
-    min-height: 100vh;
-    padding: 20px;
-    padding-top: calc(@header-height + 2rem);
-    margin-left: auto;
-    margin-right: auto;
+    box-shadow: @shadow-soft;
+    border-radius: @border-radius-amount;
+    border: 1px solid rgba(0,0,0,0.05);
+
+    min-height: 80vh;
+    padding: 3rem;
+    padding-top: calc(@header-height + 3rem);
+
+    margin: 2rem auto;
 
     @media screen and (min-width: @article-page-width) {
         width: @article-page-width;
+    }
+
+    @media screen and (max-width: @media-md-max) {
+        padding: 1.5rem;
+        padding-top: calc(@header-height + 1.5rem);
+        margin: 0;
+        border-radius: 0;
     }
 }
 
@@ -401,20 +530,15 @@ article,
     left: 0;
     right: 0;
     top: 0;
-    bottom: 0;       /* FIX: Anchor to bottom to ensure full height coverage */
+    bottom: 0;
     z-index: 0;
-    overflow: hidden; /* FIX: Cut off any video parts that stick out */
+    overflow: hidden;
 
     video {
-        /* FIX: Force video to match the container size exactly */
         width: 100%;
         height: 100%;
-
-        /* FIX: 'cover' ensures the video crops to fill the space
-           without distorting aspect ratio */
         object-fit: cover;
 
-        /* Optional: Center the video if cropped */
         position: absolute;
         top: 50%;
         left: 50%;
@@ -429,8 +553,6 @@ article,
         bottom: 0;
         display: flex;
         justify-content: center;
-
-        /* Ensure caption sits on top of the video */
         z-index: 1;
 
         h1 {
@@ -438,7 +560,7 @@ article,
             color: white;
             font-size: 3.5rem;
             text-shadow: 0px 4px 4px rgba(0,0,0,0.5);
-            margin: 0 2rem; /* Adjusted margins for mobile safety */
+            margin: 0 2rem;
             text-align: center;
 
             @media screen and (max-width: @media-md-max) {
@@ -463,22 +585,66 @@ article,
     }
 }
 
+.article-list {
+    max-width: 900px;
+}
+
 .article-links {
     list-style: none;
     padding-left: 0;
+    margin-top: 2rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 .article-link {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+
+    &:hover {
+        transform: translateY(-2px); /* Slight lift */
+        box-shadow: @shadow-hover;
+        border-color: rgba(53, 87, 149, 0.2);
+
+        .article-title {
+            color: @col-accent;
+        }
+    }
+
     a {
         display: flex;
-        gap: 3rem;
+        align-items: center;
+        padding: 1.5rem;
+        gap: 2rem;
+        width: 100%;
+
+        @media screen and (max-width: @media-sm-max) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
     }
 
     .article-date {
-        width: 5rem;
+        font-family: "Montserrat", sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: @col-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        min-width: 100px;
+    }
+
+    .article-title {
+        font-family: "Poppins", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: @col-text-main;
+        transition: color 0.2s;
     }
 }
 
