@@ -49,7 +49,7 @@ että emme aivan heti joudu maksamaan tämän sivuston hostauksesta tällä ratk
 
 **Toivommekin koko jäsenistöltämme sisältöä uusille sivuillemme!** Erityisesti kaipaamme tapahtumia ja artikkeleita. Jos
 olet järjestämässä tapahtumaa niin lisää se [tapahtumakalenteriimme](/tapahtumat.html). Jos haluaisit vaikka kertoa
-tarinan dronen rakentamisesta, niin tee siitä uusi [artikkeli](/artikkelit.html).
+tarinan dronen rakentamisesta, niin tee siitä uusi [artikkeli](/artikkelit/).
 
 Ohjeet ja muukin sisältö, sekä lähdekoodi löytyy [Githubista](https://github.com/empperi/fpv-finland-www-site/). Ja
 jos on mitään kysyttävää siitä, miten sisältöä kykenee luomaan niin voit aina kysyä apua Slackissa. Mikäli Github ja
