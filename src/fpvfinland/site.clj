@@ -9,7 +9,9 @@
              ["/etusivu.html" "/"]
              [(format "/%s.html" (str/replace % ".md" "")) (format "/%s.html" (str/replace % ".md" ""))])
           #(.getName %))
-    (files/list-files "./resources/public/pages")))
+    (filter
+      (complement #(= "404.md" (.getName %)))
+      (files/list-files "./resources/public/pages"))))
 
 (defn create-main-nav-links []
   (let [extract-name-fn #(str/replace % #"/([a-zA-Z]+).*" "$1")
