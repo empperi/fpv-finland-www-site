@@ -36,7 +36,7 @@
 (defn opengraph []
   (seq [[:meta {:property "og:title" :content "FPV Finland Ry"}]
         [:meta {:property "og:type" :content "website"}]
-        [:meta {:property "og:image" :content "foo.png"}]
+        [:meta {:property "og:image" :content "/img/FF_logo_round.png"}]
         [:meta {:property "og:locale" :content "fi_FI"}]
         [:meta {:property "og:description" :content "FPV Finland on FPV-dronetoimintaa edistävä yhdistys"}]]))
 
