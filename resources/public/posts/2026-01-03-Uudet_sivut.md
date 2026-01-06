@@ -1,4 +1,6 @@
-# Uudet sivut FPV Finlandille!
+[:article-lead 
+  date="2026-01-03" 
+  header="Uudet sivut FPV Finlandille!"]
 
 Jäsenistömme, sekä muu yleisö ovat huomanneet, että FPV Finlandin sivut ovat olleet auttamattomasti vanhentuneet.
 Olemme saaneet jopa kysymyksiä, että onko yhdistyksemme enää aktiivinen, sillä monet sivustomme materiaalista on ollut

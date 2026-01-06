@@ -9,30 +9,23 @@
             [fpvfinland.layout.base :as base]
             [fpvfinland.plugins.plugins :as plugins]))
 
-(def ARTICLE_IMAGE_LEAD_CLASS "lead")
-
-(defn with-layout [& page-content]
-  (apply base/with-layout (nav/nav) page-content))
+(defn with-layout [html-url & page-content]
+  (apply base/with-layout html-url (nav/nav) page-content))
 
 (defn md->hiccup [md]
   (if (string? md)
     (cmh/markdown->hiccup md)
     md))
 
-(defn apply-layout [markdown & [wrap-hiccup]]
+(defn apply-layout [html-url markdown & [wrap-hiccup]]
   (with-layout
+    html-url
     (if (some? wrap-hiccup)
       (conj wrap-hiccup (seq [(md->hiccup markdown)]))
       (seq [(md->hiccup markdown)]))))
 
 (defn ->html5-page [html-str]
   (str "<!DOCTYPE html>\n" html-str))
-
-(defn md-page [md-file-name]
-  (->html5-page
-    (apply-layout
-      (md/slurp-md-page md-file-name)
-      [:div.content-wrap])))
 
 (defn article-date-elem [article]
   (let [[year month day] (str/split (:date article) #"[-]")]
@@ -51,6 +44,7 @@
                                [:span.article-title (:title article)]]])
                            articles)]
     (with-layout
+      "/artikkelit/"
       [:div.content-wrap.article-list
        [:h3 "FPV Finlandin julkaistut artikkelit aikajärjestyksessä"]
        [:ul.article-links article-links]])))
@@ -77,15 +71,6 @@
 (defn ->child-tag [x]
   (first (second x)))
 
-(defn convert-lead-image [hiccup]
-  (w/postwalk
-    (fn [x]
-      (if (and (img-tag? x)
-               (str/starts-with? (:alt (second x)) "LEAD:"))
-        (update x 1 assoc :class ARTICLE_IMAGE_LEAD_CLASS)
-        x))
-    hiccup))
-
 (defn convert-video [hiccup]
   (w/postwalk
     (fn [x]
@@ -111,36 +96,10 @@
         x))
     hiccup))
 
-(defn remove-empty-paragraphs-from-lead-images [hiccup]
-  (w/postwalk
-    (fn [x]
-      (if (and (paragraph-tag? x)
-               (img-tag? (first (second x)) ARTICLE_IMAGE_LEAD_CLASS)
-               ; ensure only :p with one child
-               (= 2 (count x))
-               ; ensure no inline text elements, only img tag
-               (= 1 (count (second x))))
-        (first (second x))
-        x))
-    hiccup))
-
-(defn has-lead-image? [hiccup]
-  (some
-    #(img-tag? % ARTICLE_IMAGE_LEAD_CLASS)
-    hiccup))
-
-(defn wrap-as-readable-article [hiccup article]
-  (let [date-elem (article-date-elem article)]
-    [:article
-     [:div.progress-container [:div.progress-bar]]
-     (if (has-lead-image? hiccup)
-       (let [header-with-lead (take 2 hiccup)]
-         (list [:div.article-lead
-                date-elem
-                header-with-lead]
-               (drop 2 hiccup)))
-       (list date-elem
-             hiccup))]))
+(defn wrap-as-readable-article [hiccup]
+  [:article
+   [:div.progress-container [:div.progress-bar]]
+   hiccup])
 
 (defn apply-plugins [hiccup]
   (w/postwalk
@@ -152,25 +111,31 @@
         x))
     hiccup))
 
+(defn md-file-name->html-url [md-file-name & [prefix]]
+  (let [html-url (str "/" (str/replace md-file-name #"\.md" ".html"))]
+    (if (some? prefix)
+      (str prefix html-url)
+      html-url)))
+
 (defn enriched-md-page [md-file-name]
-  (->html5-page
-    (-> (md/slurp-md-page md-file-name)
-        cmh/markdown->hiccup
-        convert-lead-image
-        remove-empty-paragraphs-from-lead-images
-        convert-video
-        apply-plugins
-        (apply-layout [:div.content-wrap]))))
+  (let [layout-fn (partial apply-layout (md-file-name->html-url md-file-name))]
+    (->html5-page
+      (-> (md/slurp-md-page md-file-name)
+          cmh/markdown->hiccup
+          convert-video
+          apply-plugins
+          (layout-fn [:div.content-wrap])))))
 
 (defn create-article-pages []
   (->> (articles/get-articles)
        (map (fn [article]
-              {(articles/article-link article) (-> (:content article)
-                                                   cmh/markdown->hiccup
-                                                   convert-lead-image
-                                                   remove-empty-paragraphs-from-lead-images
-                                                   (wrap-as-readable-article article)
-                                                   with-layout)}))
+              (let [article-link (articles/article-link article)
+                    layout-fn    (partial with-layout article-link)]
+                {article-link (-> (:content article)
+                                  cmh/markdown->hiccup
+                                  wrap-as-readable-article
+                                  apply-plugins
+                                  layout-fn)})))
        (apply merge)))
 
 (defn create-main-navigation-pages []
