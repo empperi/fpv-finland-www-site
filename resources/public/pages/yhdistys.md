@@ -67,4 +67,4 @@ Varajäsenet:
 - Antti Haimilahti
 - Tomi Jokinen
 
-Yhteystiedot hallitukseen ja yhdistykseen löytyvät [yhteystiedot](,/yhteystiedot.html) -sivulta.
+Yhteystiedot hallitukseen ja yhdistykseen löytyvät [yhteystiedot](/yhteystiedot.html) -sivulta.
