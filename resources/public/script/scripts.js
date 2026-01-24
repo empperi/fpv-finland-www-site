@@ -105,6 +105,8 @@ const showSearchResults = (inputElem, results, searchQuery) => {
            setTimeout(() => {
               inputElem.value = "";
               hideSearchresults(inputElem);
+              // in case we are in mobile layout, doesn't affect desktop layout
+              hideBurgerMenu();
            }, 500);
         });
         searchResultTemplate.insertAdjacentElement("afterend", clone);
