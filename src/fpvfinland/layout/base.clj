@@ -83,19 +83,21 @@
       [:p (str "Sivusto käyttää keksejä analytiikkatarkoituksiin. Jos et halua osallistua sivuston kehittämiseen "
                "siten, että ymmärtäisimme miten sivua luetaan ja käytetään niin tämä on OK! Siinä tapauksessa "
                "klikkaa 'Kiitos ei'. Jos taas tämä ei haittaa niin kiitämme sinua tästä ja klikkaa 'Tottakai!")]
-      [:a {:href "#"
-           :onclick "acceptCookies()"}
-      "Tottakai!"]
-      [:a {:href "#"
-           :onclick "declineCookies()"}
-      "Kiitos ei"]]
+      [:div.buttons
+       [:a {:href "#"
+            :onclick "acceptCookies()"}
+        "Tottakai!"]
+       [:a {:href "#"
+            :onclick "declineCookies()"}
+        "Kiitos ei"]]]
      [:div#tracking-blocked.cookies.hide
       [:p (str "Hyväksyit analytiikkaseurannan, mutta käytössäsi on seurannan esto (ad blocker). Pyydämme, että "
                "sallisit sivustollemme poikkeuksen estosovelluksessasi. Jos et halua tehdä näin, niin voit "
                "estää seurannan oheisella napilla")]
-      [:a {:href "#"
-           :onClick "declineCookies()"}
-       "Estä"]]]))
+      [:div.buttons
+       [:a {:href "#"
+            :onClick "declineCookies()"}
+        "Estä"]]]]))
 
 (defn with-layout [html-url nav-content & page-content]
   (str (h/html (add-resource-timestamps (layout html-url page-content nav-content)))))
