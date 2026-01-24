@@ -3,8 +3,7 @@
             [clojure.walk :as w]
             [fpvfinland.resource-files :as res-files]
             [hiccup2.core :as h]
-            [fpvfinland.layout.search :as search]
-            [fpvfinland.layout.analytics :as analytics]))
+            [fpvfinland.layout.search :as search]))
 
 (def COMPILE_TIMESTAMP (System/currentTimeMillis))
 
@@ -58,7 +57,6 @@
               [:link {:rel "stylesheet" :href "/styles/styles.css"}]
               (seq (apply concat (mapv :plugin/style plugins)))
               (opengraph html-url)
-              (analytics/analytics)
               [:script {:type "text/javascript"}
                (h/raw (str "const searchDatabase = " (search/memoized-search-json)))]
               [:script {:type "text/javascript" :src "/script/Snowball.min.js"}]
@@ -80,7 +78,24 @@
                 :class "nav-logo"}]]]
        nav-content
        (search/search-input "full-page")]]
-     [:main content]]))
+     [:main content]
+     [:div#cookie-consent.cookies.hide
+      [:p (str "Sivusto käyttää keksejä analytiikkatarkoituksiin. Jos et halua osallistua sivuston kehittämiseen "
+               "siten, että ymmärtäisimme miten sivua luetaan ja käytetään niin tämä on OK! Siinä tapauksessa "
+               "klikkaa 'Kiitos ei'. Jos taas tämä ei haittaa niin kiitämme sinua tästä ja klikkaa 'Tottakai!")]
+      [:a {:href "#"
+           :onclick "acceptCookies()"}
+      "Tottakai!"]
+      [:a {:href "#"
+           :onclick "declineCookies()"}
+      "Kiitos ei"]]
+     [:div#tracking-blocked.cookies.hide
+      [:p (str "Hyväksyit analytiikkaseurannan, mutta käytössäsi on seurannan esto (ad blocker). Pyydämme, että "
+               "sallisit sivustollemme poikkeuksen estosovelluksessasi. Jos et halua tehdä näin, niin voit "
+               "estää seurannan oheisella napilla")]
+      [:a {:href "#"
+           :onClick "declineCookies()"}
+       "Estä"]]]))
 
 (defn with-layout [html-url nav-content & page-content]
   (str (h/html (add-resource-timestamps (layout html-url page-content nav-content)))))

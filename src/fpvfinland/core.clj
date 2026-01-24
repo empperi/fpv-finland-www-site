@@ -13,7 +13,6 @@
             [optimus-less.core]
 
             [fpvfinland.pages :as pages]
-            [fpvfinland.layout.analytics :as analytics]
             [fpvfinland.resource-files :as res-files]))
 
 ;; ----------------------------------------
@@ -79,14 +78,13 @@
   "Exports the site to a static directory."
   []
   (println "Exporting static resources...")
-  (binding [analytics/enable-analytics? true]
-    (let [target-dir "./firebase/public"
-          assets     (-> (get-assets)
-                         (optimizations/minify-js-assets)
-                         (optimizations/minify-css-assets)
-                         (optimizations/inline-css-imports))
-          pages (get-pages)]
-      (stasis/empty-directory! target-dir)
-      (stasis/export-pages pages target-dir {})
-      (optimus.export/save-assets assets target-dir)
-      (println "Export finished to" target-dir))))
+  (let [target-dir "./firebase/public"
+        assets     (-> (get-assets)
+                       (optimizations/minify-js-assets)
+                       (optimizations/minify-css-assets)
+                       (optimizations/inline-css-imports))
+        pages (get-pages)]
+    (stasis/empty-directory! target-dir)
+    (stasis/export-pages pages target-dir {})
+    (optimus.export/save-assets assets target-dir)
+    (println "Export finished to" target-dir)))
