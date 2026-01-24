@@ -15,10 +15,14 @@
 (def finnish-stopwords-pred
   (complement (set (map stemmer (str/split-lines (slurp "resources/public/fi-stopwords.txt"))))))
 
+(defn drop-plugins [md-content]
+  (str/replace md-content #"\[:.*?]" ""))
+
 (defn stem-md-content
   "Sanitizes and stems all distinct words for use in search"
   [md-content]
   (let [content-words (-> md-content
+                          (drop-plugins)
                           (str/replace "\n" " ")
                           (str/replace "  " " ")
                           (str/replace url-regex "")
