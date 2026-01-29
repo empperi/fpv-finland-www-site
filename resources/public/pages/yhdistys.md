@@ -52,7 +52,7 @@ vähintään yksi vuosi. SIL16-lupajärjestelmä on tarkoitettu kokeneille ja va
 myönnetä ennenkuin jäsen on saavuttanut riittävän taitotaitotason ja hän ymmärtää hyvällä tasolla säännöt ja miksi ne
 ovat olemassa.
 
-Voit lukea lisää SIL16-lupakokonaisuudesta [täällä](./artikkelit/2026-01-03-sil16.html).
+Voit lukea lisää SIL16-lupakokonaisuudesta [täällä](./artikkelit/2026-01-29-sil16.html).
 
 ## Hallitus
 

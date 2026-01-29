@@ -1,5 +1,5 @@
 [:article-lead 
-  date="2026-01-03" 
+  date="2026-01-28" 
   header="Uudet sivut FPV Finlandille!"]
 
 Jäsenistömme, sekä muu yleisö ovat huomanneet, että FPV Finlandin sivut ovat olleet auttamattomasti vanhentuneet.
