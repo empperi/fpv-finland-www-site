@@ -179,3 +179,8 @@ nodeja, webpackeja, typescriptejä tai mitään muutakaan. Vain vanhaa kunnon ja
 [./resources/public/script/scripts.js](./resources/public/script/scripts.js). Sillä hetkellä jos alamme tarvitsemaan
 jotain hienompaa niin koska codebase on Clojurea niin järkevintä on integroida kokonaisuuteen ClojureScript. Nyt
 toistaiseksi kuitenkin näin. Keep it simple.
+
+## License / Lisenssi
+
+MIT License
+https://opensource.org/license/mit
