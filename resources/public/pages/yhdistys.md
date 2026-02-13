@@ -52,6 +52,14 @@ vähintään yksi vuosi. SIL16-lupajärjestelmä on tarkoitettu kokeneille ja va
 myönnetä ennenkuin jäsen on saavuttanut riittävän taitotaitotason ja hän ymmärtää hyvällä tasolla säännöt ja miksi ne
 ovat olemassa.
 
+FPV Finlandilla on SIL16-luvittajia tällä hetkellä seuraavilla alueilla Suomessa:
+
+- PK-seutu
+- Pirkanmaa
+- Oulun seutu
+
+Muuallakin Suomessa luvitus voi onnistua, mutta tällöin luvituksen järjestäminen voi vaatia pidempiä varoaikoja.
+
 Voit lukea lisää SIL16-lupakokonaisuudesta [täällä](./artikkelit/2026-01-29-sil16.html).
 
 ## Hallitus
