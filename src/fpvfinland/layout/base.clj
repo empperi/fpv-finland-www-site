@@ -67,7 +67,7 @@
               [:script {:src "/script/scripts.js"}]
               (seq (apply concat (mapv :plugin/script plugins)))]]
 
-    [:html
+    [:html {:lang "fi"}
      (reduce
        (fn [h head-plugin] (head-plugin h))
        head
