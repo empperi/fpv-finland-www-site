@@ -29,7 +29,7 @@
 
 (defn article-date-elem [article]
   (let [[year month day] (str/split (:date article) #"[-]")]
-    [:date {:datetime (:date article)
+    [:time {:datetime (:date article)
             :class    ["article-date"]}
      (format "%s.%s.%s" day month year)]))
 
