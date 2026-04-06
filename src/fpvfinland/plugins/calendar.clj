@@ -28,7 +28,7 @@
           [:div "Su"]]
          [:div#calendar-days.calendar-grid]]
         [:div#event-details.event-details.hidden
-         [:h3#detail-title]
+         [:h3#detail-title "Ei tapahtumia"]
          [:p#detail-date]
          [:p#detail-desc]
          [:button#close-details "Sulje"]]]))
