@@ -78,7 +78,7 @@
     [:input.search-input {:type "search"
                           :placeholder "Hae..."
                           :name "search"}]
-    [:img.search-icon {:src "/img/search.svg"}]]
+    [:img.search-icon {:src "/img/search.svg" :alt "Hae"}]]
    [:div.search-results.hide
     [:ul
      [:li.search-result-template.search-result.hide
