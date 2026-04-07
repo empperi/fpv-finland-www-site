@@ -1,0 +1,8 @@
+{
+  "name": "FPV Finland Ry",
+  "icons": [
+    { "src": "/img/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/img/icon-mask.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" },
+    { "src": "/img/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

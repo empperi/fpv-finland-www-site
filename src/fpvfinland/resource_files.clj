@@ -6,7 +6,7 @@
   [:jpg :png :gif :mp4 :ico])
 
 (def text-resource-file-types
-  [:html :css :js :svg])
+  [:html :css :js :svg :webmanifest])
 
 (def fsep java.io.File/separator)
 
