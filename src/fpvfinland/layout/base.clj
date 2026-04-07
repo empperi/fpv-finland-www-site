@@ -59,6 +59,7 @@
               (opengraph html-url)
               [:link {:rel "icon" :href "/favicon.ico" :sizes "32x32"}]
               [:link {:rel "icon" :href "/img/icon.svg" :type "image/svg+xml"}]
+              [:link {:rel "apple-touch-icon" :href "/img/apple-touch-icon.png"}]
               [:script {:type "text/javascript"}
                (h/raw (str "const searchDatabase = " (search/memoized-search-json)))]
               [:script {:type "text/javascript" :src "/script/Snowball.min.js"}]
