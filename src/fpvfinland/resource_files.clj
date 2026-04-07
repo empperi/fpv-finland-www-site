@@ -3,7 +3,7 @@
             [clojure.string :as str]))
 
 (def binary-resource-file-types
-  [:jpg :png :gif :mp4])
+  [:jpg :png :gif :mp4 :ico])
 
 (def text-resource-file-types
   [:html :css :js :svg])
