@@ -29,7 +29,7 @@
 
 (defn article-date-elem [article]
   (let [[year month day] (str/split (:date article) #"[-]")]
-    [:date {:datetime (:date article)
+    [:time {:datetime (:date article)
             :class    ["article-date"]}
      (format "%s.%s.%s" day month year)]))
 
@@ -43,11 +43,12 @@
                                (article-date-elem article)
                                [:span.article-title (:title article)]]])
                            articles)]
-    (with-layout
-      "/artikkelit/"
-      [:div.content-wrap.article-list
-       [:h3 "FPV Finlandin julkaistut artikkelit aikajärjestyksessä"]
-       [:ul.article-links article-links]])))
+    (->html5-page
+      (with-layout
+        "/artikkelit/"
+        [:div.content-wrap.article-list
+         [:h3 "FPV Finlandin julkaistut artikkelit aikajärjestyksessä"]
+         [:ul.article-links article-links]]))))
 
 (defn class-matches? [class-attr class-to-check]
   (-> (cond
@@ -135,7 +136,8 @@
                                   cmh/markdown->hiccup
                                   wrap-as-readable-article
                                   apply-plugins
-                                  layout-fn)})))
+                                  layout-fn
+                                  ->html5-page)})))
        (apply merge)))
 
 (defn create-main-navigation-pages []

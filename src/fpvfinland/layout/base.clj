@@ -48,7 +48,7 @@
               [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]
               [:title "FPV Finland Ry"]
               [:link {:rel "preconnect" :href "https://fonts.googleapis.com"}]
-              [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "true"}]
+              [:link {:rel "preconnect" :href "https://fonts.gstatic.com" :crossorigin "anonymous"}]
               [:link {:href (str "https://fonts.googleapis.com/css2"
                                  "?family=Montserrat:ital,wght@0,100..900;1,100..900"
                                  "&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900"
@@ -61,13 +61,13 @@
               [:link {:rel "icon" :href "/favicon.ico" :sizes "32x32"}]
               [:link {:rel "icon" :href "/img/icon.svg" :type "image/svg+xml"}]
               [:link {:rel "apple-touch-icon" :href "/img/apple-touch-icon.png"}]
-              [:script {:type "text/javascript"}
+              [:script
                (h/raw (str "const searchDatabase = " (search/memoized-search-json)))]
-              [:script {:type "text/javascript" :src "/script/Snowball.min.js"}]
-              [:script {:type "text/javascript" :src "/script/scripts.js"}]
+              [:script {:src "/script/Snowball.min.js"}]
+              [:script {:src "/script/scripts.js"}]
               (seq (apply concat (mapv :plugin/script plugins)))]]
 
-    [:html
+    [:html {:lang "fi"}
      (reduce
        (fn [h head-plugin] (head-plugin h))
        head
@@ -81,27 +81,27 @@
                 :alt "FPV Finland"
                 :class "nav-logo"}]]]
        nav-content
-       (search/search-input "full-page")]]
-     [:main content]
-     [:div#cookie-consent.cookies.hide
-      [:p (str "Sivusto käyttää keksejä analytiikkatarkoituksiin. Jos et halua osallistua sivuston kehittämiseen "
-               "siten, että ymmärtäisimme miten sivua luetaan ja käytetään niin tämä on OK! Siinä tapauksessa "
-               "klikkaa 'Kiitos ei'. Jos taas tämä ei haittaa niin kiitämme sinua tästä ja klikkaa 'Tottakai!")]
-      [:div.buttons
-       [:a {:href "#"
-            :onclick "acceptCookies()"}
-        "Tottakai!"]
-       [:a {:href "#"
-            :onclick "declineCookies()"}
-        "Kiitos ei"]]]
-     [:div#tracking-blocked.cookies.hide
-      [:p (str "Hyväksyit analytiikkaseurannan, mutta käytössäsi on seurannan esto (ad blocker). Pyydämme, että "
-               "sallisit sivustollemme poikkeuksen estosovelluksessasi. Jos et halua tehdä näin, niin voit "
-               "estää seurannan oheisella napilla")]
-      [:div.buttons
-       [:a {:href "#"
-            :onClick "declineCookies()"}
-        "Estä"]]]]))
+       (search/search-input "full-page")]
+      [:main content]
+      [:div#cookie-consent.cookies.hide
+       [:p (str "Sivusto käyttää keksejä analytiikkatarkoituksiin. Jos et halua osallistua sivuston kehittämiseen "
+                "siten, että ymmärtäisimme miten sivua luetaan ja käytetään niin tämä on OK! Siinä tapauksessa "
+                "klikkaa 'Kiitos ei'. Jos taas tämä ei haittaa niin kiitämme sinua tästä ja klikkaa 'Tottakai!")]
+       [:div.buttons
+        [:a {:href "#"
+             :onclick "acceptCookies()"}
+         "Tottakai!"]
+        [:a {:href "#"
+             :onclick "declineCookies()"}
+         "Kiitos ei"]]]
+      [:div#tracking-blocked.cookies.hide
+       [:p (str "Hyväksyit analytiikkaseurannan, mutta käytössäsi on seurannan esto (ad blocker). Pyydämme, että "
+                "sallisit sivustollemme poikkeuksen estosovelluksessasi. Jos et halua tehdä näin, niin voit "
+                "estää seurannan oheisella napilla")]
+       [:div.buttons
+        [:a {:href "#"
+             :onClick "declineCookies()"}
+         "Estä"]]]]]))
 
 (defn with-layout [html-url nav-content & page-content]
   (str (h/html (add-resource-timestamps (layout html-url page-content nav-content)))))
