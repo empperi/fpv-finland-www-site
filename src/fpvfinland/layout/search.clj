@@ -82,6 +82,6 @@
    [:div.search-results.hide
     [:ul
      [:li.search-result-template.search-result.hide
-      [:a {:href ""}
+      [:a {:href "#"}
        [:span.title ""]
        [:span.date ""]]]]]])
