@@ -16,7 +16,8 @@
      (nav-links)]
     [:button.nav-burger-btn {:onclick "toggleBurgerMenu()"}
      [:img.nav-burger {:id  "burger-menu-closed"
-                       :src "/img/burger-menu.svg"}]
+                       :src "/img/burger-menu.svg"
+                       :alt "Valikko"}]
      [:span.nav-burger-open {:id    "burger-menu-open"
                              :class "hide"} "X"]]
     [:div#nav-burger-list.nav-burger-list.hide
