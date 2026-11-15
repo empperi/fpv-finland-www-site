@@ -28,15 +28,15 @@
           [:div "Su"]]
          [:div#calendar-days.calendar-grid]]
         [:div#event-details.event-details.hidden
-         [:h3#detail-title]
+         [:h3#detail-title "Ei tapahtumia"]
          [:p#detail-date]
          [:p#detail-desc]
          [:button#close-details "Sulje"]]]))
 
 (def calendar-script
-  [[:script {:type "text/javascript"}
+  [[:script
     (h/raw (format "window.calendarEvents = %s;" (read-calendar-events-file)))]
-   [:script {:type "text/javascript" :src "/script/calendar.js"}]])
+   [:script {:src "/script/calendar.js"}]])
 
 (def calendar-style
   [[:link {:rel "stylesheet" :href "/styles/calendar.css"}]])
