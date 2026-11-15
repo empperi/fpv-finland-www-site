@@ -19,7 +19,7 @@
      ""
      "RULES:"
      "- Use only information explicitly stated in the thread. NEVER invent or guess dates, times, places, prices, links or names."
-     "- If the date, or the information needed for a useful entry, is missing or unclear, return a single \"none\" action with a short reason."
+     "- If the date, or the information needed for a useful entry, is missing or unclear, create no entry for it and explain in none_reason."
      "- Write all output text in Finnish."
      "- Do not mention personal names, pseudonyms such as \"Jäsen 1\", e-mail addresses, or Slack-specific things (channels, threads, mentions, reactions)."
      "- Titles must be short plain names, at most 80 characters. A title never contains commentary, questions, alternatives, parentheses with doubts or reasoning."
@@ -27,33 +27,77 @@
      "- Output Markdown only; no HTML, no raw tags, no plugin syntax such as lines starting with [: ."
      "- Links must be http or https."
      "- A multi-day event is several event entries, one per day, with titles ending in \"(day 1)\", \"(day 2)\" etc. as in the existing events."
-     "- If the thread updates or corrects an event that already exists in the list below, use \"update_event\" (match_date and match_title must equal the existing entry exactly); otherwise use \"add_event\"."
+     "- If the thread updates or corrects an event that already exists in the list below, put it in event_updates (match_date and match_title must equal the existing entry exactly); otherwise put it in events."
      "- Event dates are \"YYYY-MM-DD\". Relative dates (\"next Saturday\") must be resolved using today's date given below, only if unambiguous."
-     "- Only use \"add_article\" for content that is clearly news-like (a report, announcement or guide). Prefer events for things that happen on a date."
+     "- Only write an article for content that is clearly news-like (a report, announcement or guide). Prefer events for things that happen on a date."
      "- Do not duplicate events or articles that already exist."
-     "- FIELD NAMES MATTER: events (add_event, update_event) use \"desc\". Articles (add_article) use \"body\", which is REQUIRED and must contain the full article text in Markdown, not just a title or summary. Never put article text in \"desc\"."
-     "- Return JSON {\"actions\": [...]}. Each action has \"type\" and:"
-     "  add_event: date, title, desc (Markdown). If the thread gives no details beyond name and date, omit desc; never invent one."
-     "  update_event: match_date, match_title, and any of date, title, desc to change"
-     "  add_article: date, title, body (the full article, Markdown; required)"
-     "  none: reason"
-     "  Omit fields that do not apply."]))
+     "- ARTICLES: the \"body\" of an article is REQUIRED and must be the full article in Markdown, written primarily from the thread's own text. Rewording, structuring (headings, lists) and light editing of what the thread says is expected and is NOT inventing; still never add facts that are not in the thread. If the thread is not suitable for a full article, create no article at all (explain in none_reason) rather than an article without text."
+     "- Return a JSON object with exactly these keys:"
+     "  events: array of new events, each {date, title, desc (Markdown, optional: omit if the thread gives no details beyond name and date; never invent one), notes (optional)}"
+     "  event_updates: array of {match_date, match_title, and any of date, title, desc to change, notes (optional)}"
+     "  articles: array of {date, title, body (full article, Markdown, required), notes (optional)}"
+     "  none_reason: string; empty \"\" when you produced any entry, otherwise a short reason why nothing should be published"
+     "  Use empty arrays for kinds that do not apply."]))
+
+(defn- str-prop [] {:type "STRING"})
+
+(defn- array-of [props required ordering]
+  {:type  "ARRAY"
+   :items {:type             "OBJECT"
+           :properties       props
+           :required         required
+           :propertyOrdering ordering}})
 
 (def response-schema
-  {:type       "OBJECT"
-   :properties {:actions {:type  "ARRAY"
-                          :items {:type       "OBJECT"
-                                  :properties {:type        {:type "STRING" :enum ["add_event" "update_event" "add_article" "none"]}
-                                               :date        {:type "STRING"}
-                                               :title       {:type "STRING"}
-                                               :desc        {:type "STRING"}
-                                               :body        {:type "STRING"}
-                                               :match_date  {:type "STRING"}
-                                               :match_title {:type "STRING"}
-                                               :reason      {:type "STRING"}
-                                               :notes       {:type "STRING"}}
-                                  :required   ["type"]}}}
-   :required   ["actions"]})
+  {:type             "OBJECT"
+   :properties       {:events        (array-of {:date (str-prop) :title (str-prop) :desc (str-prop) :notes (str-prop)}
+                                               ["date" "title"]
+                                               ["date" "title" "desc" "notes"])
+                      :event_updates (array-of {:match_date (str-prop) :match_title (str-prop)
+                                                :date (str-prop) :title (str-prop) :desc (str-prop) :notes (str-prop)}
+                                               ["match_date" "match_title"]
+                                               ["match_date" "match_title" "date" "title" "desc" "notes"])
+                      :articles      (array-of {:date (str-prop) :title (str-prop) :body (str-prop) :notes (str-prop)}
+                                               ["date" "title" "body"]
+                                               ["date" "title" "body" "notes"])
+                      :none_reason   (str-prop)}
+   :required         ["events" "event_updates" "articles" "none_reason"]
+   :propertyOrdering ["events" "event_updates" "articles" "none_reason"]})
+
+(defn response->actions
+  "Converts the structured response ({events, event_updates, articles, none_reason}, string keys as
+   keywords) into the internal action list: add_event / update_event / add_article / none.
+   Returns {:actions [...]} or {:error msg}."
+  [parsed]
+  (let [kinds [[:events "add_event"] [:event_updates "update_event"] [:articles "add_article"]]]
+    (cond
+      (not (map? parsed))
+      {:error "Gemini output is not a JSON object"}
+
+      (not-any? #(contains? parsed %) [:events :event_updates :articles :none_reason])
+      {:error "Gemini output has none of events, event_updates, articles, none_reason"}
+
+      (some (fn [[k _]] (let [v (get parsed k)] (and (some? v) (not (vector? v))))) kinds)
+      {:error "Gemini output has a non-array events/event_updates/articles field"}
+
+      (some (fn [[k _]] (not-every? map? (get parsed k))) kinds)
+      {:error "Gemini output has a non-object entry"}
+
+      :else
+      (let [actions (vec (for [[k t] kinds, item (get parsed k)] (assoc item :type t)))]
+        {:actions (if (seq actions)
+                    actions
+                    [{:type   "none"
+                      :reason (let [r (:none_reason parsed)]
+                                (if (and (string? r) (not (str/blank? r))) r "no reason given"))}])}))))
+
+(defn actions->response
+  "Inverse of response->actions (used to show the model its previous answer in the repair prompt)."
+  [actions]
+  (let [of  (fn [t] (vec (for [a actions :when (= t (:type a))] (dissoc a :type))))
+        non (first (filter #(= "none" (:type %)) actions))]
+    {:events (of "add_event") :event_updates (of "update_event") :articles (of "add_article")
+     :none_reason (if (and non (empty? (mapcat of ["add_event" "update_event" "add_article"]))) (str (:reason non)) "")}))
 
 (defn- event-line [{:keys [date title desc]} full?]
   (str "- " date " | " title
@@ -126,11 +170,7 @@
                         (str "Gemini returned no text (finishReason "
                              (get-in resp [:candidates 0 :finishReason]) ")"))}
               (let [parsed (json/read-value (strip-fence text) json/keyword-keys-object-mapper)]
-                (cond
-                  (not (map? parsed))                 {:error "Gemini output is not a JSON object"}
-                  (not (vector? (:actions parsed)))   {:error "Gemini output has no 'actions' array"}
-                  (not-every? map? (:actions parsed)) {:error "Gemini output has a non-object action"}
-                  :else                               {:actions (:actions parsed)})))))))
+                (response->actions parsed)))))))
     (catch com.fasterxml.jackson.core.JsonProcessingException e
       {:error (str "Gemini returned malformed JSON: " (ex-message e))})))
 
@@ -173,8 +213,8 @@
 
 (defn- field-hint [errors]
   (when (some #(re-find #"field '" %) errors)
-    (str "Expected field names: add_event and update_event use \"desc\" (Markdown); add_article uses \"body\" "
-         "(the full article text in Markdown, required); every action needs \"type\".\n\n")))
+    (str "Reminder: events and event_updates use \"desc\" (Markdown); articles need \"body\" "
+         "(the full article text in Markdown, required); every entry needs its date and title.\n\n")))
 
 (defn build-repair-prompt
   "Original prompt + the model's previous actions + validation errors, asking for a corrected answer."
@@ -184,7 +224,7 @@
 ---
 "
        "Your previous answer was:
-" (json/write-value-as-string {:actions actions}) "
+" (json/write-value-as-string (actions->response actions)) "
 
 "
        "Our validator rejected some actions:
@@ -194,5 +234,5 @@
 
 "
        (field-hint errors)
-       "Return a corrected, complete {\"actions\": [...]} answer that fixes these problems "
+       "Return a corrected, complete answer in the same JSON shape (events, event_updates, articles, none_reason) that fixes these problems "
        "(for example shorter plain titles; put reasoning in \"notes\"). Keep actions that were fine."))
