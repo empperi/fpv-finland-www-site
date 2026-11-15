@@ -117,7 +117,8 @@
 
 (defn- ev-json [title & [notes]]
   (json/write-value-as-string
-    {:actions [(cond-> {:type "add_event" :date "2026-12-12" :title title :desc "x"} notes (assoc :notes notes))]}))
+    {:events [(cond-> {:date "2026-12-12" :title title :desc "x"} notes (assoc :notes notes))]
+     :event_updates [] :articles [] :none_reason ""}))
 
 (def pt-ctx {:today (LocalDate/parse "2026-11-15") :gemini-cfg {:api-key "k" :model "m"}})
 (def pt-state {:events-text events-text :new-articles [] :article-names #{} :article-titles []})
@@ -189,7 +190,7 @@
 
 (deftest placeholder-desc-is-flagged-in-pr-body
   (let [[req _] (seq-req [(gem-resp (json/write-value-as-string
-                                      {:actions [{:type "add_event" :date "2026-12-12" :title "Nimi"}]}))])
+                                      {:events [{:date "2026-12-12" :title "Nimi"}] :event_updates [] :articles [] :none_reason ""}))])
         r (core/process-thread req pt-ctx pt-state [{:author "Jäsen 1" :text "hei"}])
         body (core/pr-body [(assoc r :permalink "p")] [] true)]
     (is (= :changed (:status r)))

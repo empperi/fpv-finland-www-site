@@ -12,7 +12,7 @@ to `master`; a human reviews and merges the PR.
    not looked at: react on the first message of the thread.
 3. The whole thread is anonymised (user ids, names, e-mails removed; authors become "Jäsen 1", "Jäsen 2", ...)
    and sent to Gemini, one request per thread. Permalinks are only used in the PR body.
-4. Gemini returns structured JSON (`add_event`, `update_event`, `add_article`, `none`). The Clojure code validates
+4. Gemini returns structured JSON (`events`, `event_updates`, `articles`, `none_reason`; required fields are enforced by the response schema and converted internally to add_event/update_event/add_article/none). The Clojure code validates
    everything (dates, lengths, no HTML, no `[:plugin` syntax, only http/https links, update targets must match
    exactly once) and writes the files itself. Gemini never edits files. Rejections are listed in the PR body.
 5. After the PR is created (`mark-done` needs only `SLACK_BOT_TOKEN`), `lein slack-sync mark-done sync-result/processed.json` adds the checkmark reaction.
