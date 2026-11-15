@@ -5,10 +5,11 @@
             [jsonista.core :as json]
             [fpvfinland.sync.core :as core]
             [fpvfinland.sync.events-file :as ef]
-            [fpvfinland.sync.fixture :as fixture])
+            [fpvfinland.sync.fixture :as fixture]
+            [fpvfinland.sync.gemini :as gemini])
   (:import (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)
-           (java.time Instant)))
+           (java.time Instant LocalDate)))
 
 (def base-env {"SLACK_BOT_TOKEN" "x" "SLACK_ALLOWED_USER_IDS" "U1, U2 ,," "GEMINI_API_KEY" "k"})
 
@@ -102,3 +103,104 @@
     (is (zero? (core/mark-done req "tok" "white_check_mark" (str f))))
     (is (= [["C1" "1.5" "white_check_mark"] ["C2" "2.5" "white_check_mark"]]
            (map (fn [w] [(get-in w [:params "channel"]) (get-in w [:params "timestamp"]) (get-in w [:params "name"])]) @writes)))))
+
+;; ---- repair round, notes, PR wording, error reporting ----
+
+(defn- gem-resp [text]
+  {:status 200 :body (json/write-value-as-string {:candidates [{:content {:parts [{:text text}]}}]})})
+
+(defn- seq-req
+  "Request fn answering with the given responses in order; returns [req-fn calls-atom]."
+  [responses]
+  (let [q (atom responses) calls (atom [])]
+    [(fn [req] (swap! calls conj req) (let [r (first @q)] (swap! q rest) r)) calls]))
+
+(defn- ev-json [title & [notes]]
+  (json/write-value-as-string
+    {:actions [(cond-> {:type "add_event" :date "2026-12-12" :title title :desc "x"} notes (assoc :notes notes))]}))
+
+(def pt-ctx {:today (LocalDate/parse "2026-11-15") :gemini-cfg {:api-key "k" :model "m"}})
+(def pt-state {:events-text events-text :new-articles [] :article-names #{} :article-titles []})
+(def long-title (apply str (repeat 130 "a")))
+
+(deftest no-repair-when-first-answer-valid
+  (let [[req calls] (seq-req [(gem-resp (ev-json "Hyvä" "mietin @joku:n sanaa\nkahdella rivillä"))])
+        r (core/process-thread req pt-ctx pt-state [{:author "Jäsen 1" :text "hei"}])]
+    (is (= 1 (count @calls)))
+    (is (= :changed (:status r)))
+    (is (not (:repaired? r)))
+    (testing "model notes are kept for the PR body, single line, mentions defanged"
+      (let [n (some :model-notes (:notes r))]
+        (is (= "mietin @​joku:n sanaa kahdella rivillä" n))))))
+
+(deftest repair-succeeds
+  (let [[req calls] (seq-req [(gem-resp (ev-json long-title)) (gem-resp (ev-json "Lyhyt"))])
+        r (core/process-thread req pt-ctx pt-state [{:author "Jäsen 1" :text "hei"}])
+        second-prompt (get-in (json/read-value (:body (second @calls))) ["contents" 0 "parts" 0 "text"])]
+    (is (= 2 (count @calls)))
+    (is (= :changed (:status r)))
+    (is (:repaired? r))
+    (is (str/includes? second-prompt "longer than 120"))
+    (is (str/includes? second-prompt long-title) "previous JSON is included")
+    (is (str/includes? (:events-text (:state r)) "\"Lyhyt\""))
+    (is (not (str/includes? (:events-text (:state r)) long-title)))))
+
+(deftest repair-still-invalid
+  (let [[req calls] (seq-req [(gem-resp (ev-json long-title)) (gem-resp (ev-json long-title)) (gem-resp (ev-json "Ei kutsuta"))])
+        r (core/process-thread req pt-ctx pt-state [{:author "Jäsen 1" :text "hei"}])]
+    (is (= 2 (count @calls)) "at most one repair")
+    (is (= :rejected (:status r)))
+    (is (= events-text (:events-text (:state r))))
+    (is (some #(re-find #"longer than 120" (:text %)) (:notes r)))))
+
+(deftest repair-api-failure-falls-back-to-first-result
+  (let [[req calls] (seq-req [(gem-resp (ev-json long-title)) {:status 500 :body "{}"}])
+        r (core/process-thread req pt-ctx pt-state [{:author "Jäsen 1" :text "hei"}])]
+    (is (= :rejected (:status r)))
+    (is (= 2 (count @calls)))))
+
+(deftest gemini-http-error-includes-message-and-model-hint
+  (let [r (gemini/generate-prompt
+            (fn [_] {:status 404 :body "{\"error\":{\"code\":404,\"message\":\"models/m is not found\",\"status\":\"NOT_FOUND\"}}"})
+            {:api-key "k" :model "m"} "p")]
+    (is (str/includes? (:error r) "Gemini HTTP 404: models/m is not found"))
+    (is (str/includes? (:error r) "check GEMINI_MODEL, current: m")))
+  (testing "non-JSON error body"
+    (is (= "Gemini HTTP 500" (:error (gemini/generate-prompt (fn [_] {:status 500 :body "oops"}) {:api-key "k" :model "m"} "p"))))))
+
+(deftest pr-body-wording-matches-marking
+  (let [o {:permalink "https://x/p1" :status :rejected :repaired? true
+           :notes [{:kind :rejected :text "add_event: bad" :model-notes "epävarma"}]}
+        with-changes    (core/pr-body [o] [] true)
+        without-changes (core/pr-body [o] [] false)]
+    (is (str/includes? with-changes "marked as processed and will not be retried"))
+    (is (not (str/includes? without-changes "will not be retried")))
+    (is (str/includes? without-changes "will be retried on the next run"))
+    (is (str/includes? with-changes "one repair request was used"))
+    (is (str/includes? with-changes "Model notes (unverified): epävarma"))))
+
+(deftest console-charset-selection
+  (let [cs (fn [m kind] (str (core/console-charset m kind)))]
+    (is (= "IBM437" (cs {"stdout.encoding" "cp437"} "stdout")))
+    (is (= "windows-1252" (cs {"native.encoding" "Cp1252"} "stderr")) "falls back to native.encoding")
+    (is (= "UTF-8" (cs {} "stdout")) "falls back to UTF-8")
+    (is (= "UTF-8" (cs {"stdout.encoding" "no-such-charset"} "stdout")))
+    (is (= "UTF-8" (cs {"stdout.encoding" "UTF-8" "native.encoding" "cp437"} "stdout")))))
+
+(deftest placeholder-desc-is-flagged-in-pr-body
+  (let [[req _] (seq-req [(gem-resp (json/write-value-as-string
+                                      {:actions [{:type "add_event" :date "2026-12-12" :title "Nimi"}]}))])
+        r (core/process-thread req pt-ctx pt-state [{:author "Jäsen 1" :text "hei"}])
+        body (core/pr-body [(assoc r :permalink "p")] [] true)]
+    (is (= :changed (:status r)))
+    (is (not (:repaired? r)) "missing desc no longer triggers a repair")
+    (is (str/includes? (:events-text (:state r)) "Lisätietoja tulossa."))
+    (is (str/includes? body "No description in the thread; placeholder used"))))
+
+(deftest gemini-progress-lines
+  (let [lines (atom [])
+        [req _] (seq-req [(gem-resp (ev-json "Hyvä"))])]
+    (binding [fpvfinland.sync.log/*log-fn* #(swap! lines conj %)]
+      (core/process-thread req (assoc pt-ctx :thread-id "C1/1.5") pt-state [{:author "Jäsen 1" :text "hei"}]))
+    (is (= "gemini: thread C1/1.5: request 1 (initial) ..." (first @lines)))
+    (is (re-matches #"gemini: thread C1/1.5: done in \d+ s" (second @lines)))))

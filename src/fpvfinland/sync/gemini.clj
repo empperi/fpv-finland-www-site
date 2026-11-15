@@ -2,6 +2,7 @@
   "Google Gemini REST API (generateContent) with structured JSON output. The model only
    proposes actions; it never touches files."
   (:require [clojure.string :as str]
+            [fpvfinland.sync.log :as log]
             [jsonista.core :as json]))
 
 (def base-url "https://generativelanguage.googleapis.com/v1beta/models/")
@@ -21,6 +22,8 @@
      "- If the date, or the information needed for a useful entry, is missing or unclear, return a single \"none\" action with a short reason."
      "- Write all output text in Finnish."
      "- Do not mention personal names, pseudonyms such as \"Jäsen 1\", e-mail addresses, or Slack-specific things (channels, threads, mentions, reactions)."
+     "- Titles must be short plain names, at most 80 characters. A title never contains commentary, questions, alternatives, parentheses with doubts or reasoning."
+     "- Put any uncertainty, assumptions or reasoning only in the optional \"notes\" field of the action (a short sentence in English or Finnish). Notes are never published."
      "- Output Markdown only; no HTML, no raw tags, no plugin syntax such as lines starting with [: ."
      "- Links must be http or https."
      "- A multi-day event is several event entries, one per day, with titles ending in \"(day 1)\", \"(day 2)\" etc. as in the existing events."
@@ -29,7 +32,7 @@
      "- Only use \"add_article\" for content that is clearly news-like (a report, announcement or guide). Prefer events for things that happen on a date."
      "- Do not duplicate events or articles that already exist."
      "- Return JSON {\"actions\": [...]}. Each action has \"type\" and:"
-     "  add_event: date, title, desc (Markdown)"
+     "  add_event: date, title, desc (Markdown). If the thread gives no details beyond name and date, omit desc; never invent one."
      "  update_event: match_date, match_title, and any of date, title, desc to change"
      "  add_article: date, title, body (Markdown)"
      "  none: reason"
@@ -46,7 +49,8 @@
                                                :body        {:type "STRING"}
                                                :match_date  {:type "STRING"}
                                                :match_title {:type "STRING"}
-                                               :reason      {:type "STRING"}}
+                                               :reason      {:type "STRING"}
+                                               :notes       {:type "STRING"}}
                                   :required   ["type"]}}}
    :required   ["actions"]})
 
@@ -97,12 +101,20 @@
       (str/replace #"^```(?:json)?\s*" "")
       (str/replace #"\s*```$" "")))
 
+(defn- http-error-message [body]
+  (try (let [m (get-in (json/read-value body json/keyword-keys-object-mapper) [:error :message])]
+         (when (string? m)
+           (let [one (str/replace (str/trim m) #"\s+" " ")]
+             (if (> (count one) 200) (str (subs one 0 200) "...") one))))
+       (catch Exception _ nil)))
+
 (defn parse-response
   "HTTP response -> {:actions [maps with keyword keys]} or {:error message}."
   [{:keys [status body]}]
   (try
     (if-not (= 200 status)
-      {:error (str "Gemini HTTP " status)}
+      {:status status
+       :error  (str "Gemini HTTP " status (when-let [m (http-error-message body)] (str ": " m)))}
       (let [resp (json/read-value body json/keyword-keys-object-mapper)]
         (if-let [reason (get-in resp [:promptFeedback :blockReason])]
           {:error (str "Gemini blocked the prompt: " reason)}
@@ -119,8 +131,45 @@
     (catch com.fasterxml.jackson.core.JsonProcessingException e
       {:error (str "Gemini returned malformed JSON: " (ex-message e))})))
 
+(defn generate-prompt
+  "One request with a ready prompt. Returns {:actions [...]} or {:error msg}.
+   Network exceptions become {:error}; a 404 gets a hint about GEMINI_MODEL."
+  [req-fn cfg prompt]
+  (let [tag   (str "gemini: " (when (:thread-id cfg) (str "thread " (:thread-id cfg) ": ")))
+        start (System/nanoTime)
+        secs  #(Math/round (/ (- (System/nanoTime) start) 1e9))]
+    (log/log tag "request " (or (:request cfg) "1 (initial)") " ...")
+    (let [result (try (let [r (parse-response (req-fn (build-request cfg prompt)))]
+                        (if (= 404 (:status r))
+                          (update r :error str " (check GEMINI_MODEL, current: " (:model cfg) ")")
+                          r))
+                      (catch Exception e
+                        {:error (if (:timeout (ex-data e))
+                                  (ex-message e)
+                                  (str "Gemini request failed: " (ex-message e)))}))]
+      (log/log tag (if (:error result) "failed" "done") " in " (secs) " s")
+      result)))
+
 (defn generate
-  "One request. Returns {:actions [...]} or {:error msg}. Network exceptions become {:error}."
   [req-fn cfg input]
-  (try (parse-response (req-fn (build-request cfg (build-prompt input))))
-       (catch Exception e {:error (str "Gemini request failed: " (ex-message e))})))
+  (generate-prompt req-fn cfg (build-prompt input)))
+
+(defn build-repair-prompt
+  "Original prompt + the model's previous actions + validation errors, asking for a corrected answer."
+  [prompt actions errors]
+  (str prompt "
+
+---
+"
+       "Your previous answer was:
+" (json/write-value-as-string {:actions actions}) "
+
+"
+       "Our validator rejected some actions:
+"
+       (str/join "
+" (map #(str "- " %) errors)) "
+
+"
+       "Return a corrected, complete {\"actions\": [...]} answer that fixes these problems "
+       "(for example shorter plain titles; put reasoning in \"notes\"). Keep actions that were fine."))

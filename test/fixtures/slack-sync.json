@@ -33,8 +33,9 @@
     "chat.getPermalink:C1:1000.7": {"ok": true, "permalink": "https://example.slack.com/archives/C1/p10007"}
   },
   "gemini": [
-    {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_event\",\"date\":\"2026-12-12\",\"title\":\"Talvikisa\",\"desc\":\"Kisaamme 5\\\" kokoluokalla Launoisissa. Lisätietoja: https://example.com\"},{\"type\":\"update_event\",\"match_date\":\"2026-10-30\",\"match_title\":\"Kolmas\",\"desc\":\"Päivitetty kuvaus\"}]}"}]}}]},
+    {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_event\",\"date\":\"2026-12-12\",\"title\":\"Talvikisa\",\"desc\":\"Kisaamme 5\\\" kokoluokalla Launoisissa. Lisätietoja: https://example.com\",\"notes\":\"Päivämäärä 12.12. tulkittu tälle vuodelle, @someone vahvistaa paikan.\"},{\"type\":\"update_event\",\"match_date\":\"2026-10-30\",\"match_title\":\"Kolmas\",\"desc\":\"Päivitetty kuvaus\"}]}"}]}}]},
     {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_article\",\"date\":\"2026-11-14\",\"title\":\"Kisaraportti: \\\"Talvi\\\" meni hyvin\",\"body\":\"Kisa sujui hyvin ja osallistujia oli runsaasti.\"}]}"}]}}]},
+    {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_event\",\"date\":\"2026-02-30\",\"title\":\"Mahdoton\",\"desc\":\"x\"}]}"}]}}]},
     {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_event\",\"date\":\"2026-02-30\",\"title\":\"Mahdoton\",\"desc\":\"x\"}]}"}]}}]},
     {"candidates": [{"content": {"parts": [{"text": "{\"actions\": [ oops"}]}}]},
     {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"none\",\"reason\":\"Pelkkaa keskustelua\"}]}"}]}}]}

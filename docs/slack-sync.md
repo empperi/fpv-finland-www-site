@@ -24,6 +24,14 @@ to `master`; a human reviews and merges the PR.
 assumed to be roughly date sorted), otherwise appended at the end; updates replace only that entry's block.
 Every write is re-read with `clojure.edn` and compared with the expected data; a mismatch aborts the run.
 
+## Run time
+
+On the free Gemini tier a single thread can take several minutes. The log prints progress lines:
+`gemini: thread C.../...: request 1 (initial) ...` when a request starts, `done in N s` (or `failed in N s`) when
+it ends, and `request 2 (repair)` for the single repair attempt after validation errors. `gemini: HTTP 429, retrying
+in N s (2/3)` means rate limiting; `timed out after 300 s, retrying (2/2)` means the request timed out (Gemini:
+300 s timeout, a timeout is retried once). Slack calls use a 90 s timeout. The job times out after 90 minutes.
+
 ## Slack app setup
 
 1. https://api.slack.com/apps -> Create New App -> From scratch.

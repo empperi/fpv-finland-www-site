@@ -9,6 +9,7 @@
 
 (def limits {:event-title 120 :article-title 150 :event-desc 4000 :article-body 20000})
 (def max-date-distance-days 730)
+(def placeholder-desc "Lisätietoja tulossa.")
 
 (defn- fail [msg] (throw (ex-info msg {::invalid true})))
 
@@ -79,10 +80,15 @@
     "add_event"
     (let [date  (check-date! (need-string action :date) today "date")
           title (check-title! (need-string action :title) (:event-title limits) "title")
-          desc  (check-markdown! (need-string action :desc) (:event-desc limits) "desc")]
+          raw   (:desc action)
+          none? (or (nil? raw) (and (string? raw) (str/blank? raw)))
+          desc  (if none?
+                  placeholder-desc
+                  (check-markdown! (need-string action :desc) (:event-desc limits) "desc"))]
       (when (seq (ef/find-matches events date title))
         (fail "an event with the same date and title already exists"))
-      {:type :add-event :date date :title title :desc desc})
+      (cond-> {:type :add-event :date date :title title :desc desc}
+        none? (assoc :placeholder-desc? true)))
 
     "update_event"
     (let [md      (need-string action :match_date)

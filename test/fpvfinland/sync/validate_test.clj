@@ -42,8 +42,13 @@
   (is (ok? (assoc good-article :title (apply str (repeat 150 "a")))))
   (is (re-find #"longer" (err (assoc good-event :desc (apply str (repeat 4001 "a"))))))
   (is (re-find #"longer" (err (assoc good-article :body (apply str (repeat 20001 "a"))))))
-  (is (re-find #"empty" (err (assoc good-event :desc ""))))
-  (is (re-find #"missing" (err (dissoc good-event :desc)))))
+  (testing "event desc is optional: placeholder and flag"
+    (doseq [a [(dissoc good-event :desc) (assoc good-event :desc "") (assoc good-event :desc "  \n ")]]
+      (is (= {:type :add-event :date "2026-12-20" :title "Uusi kisa" :desc "Lisätietoja tulossa." :placeholder-desc? true}
+             (:ok (v/validate-action a ctx))))))
+  (is (re-find #"missing or non-string" (err (assoc good-event :desc 5))))
+  (is (re-find #"HTML" (err (assoc good-event :desc "<b>x</b>"))))
+  (is (re-find #"empty" (err (assoc good-article :body "")))))
 
 (deftest markdown-safety
   (doseq [bad ["<script>alert(1)</script>" "x <iframe src=a></iframe>" "<style>x</style>" "<img src=x onerror=a()>"
