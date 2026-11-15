@@ -31,10 +31,11 @@
      "- Event dates are \"YYYY-MM-DD\". Relative dates (\"next Saturday\") must be resolved using today's date given below, only if unambiguous."
      "- Only use \"add_article\" for content that is clearly news-like (a report, announcement or guide). Prefer events for things that happen on a date."
      "- Do not duplicate events or articles that already exist."
+     "- FIELD NAMES MATTER: events (add_event, update_event) use \"desc\". Articles (add_article) use \"body\", which is REQUIRED and must contain the full article text in Markdown, not just a title or summary. Never put article text in \"desc\"."
      "- Return JSON {\"actions\": [...]}. Each action has \"type\" and:"
      "  add_event: date, title, desc (Markdown). If the thread gives no details beyond name and date, omit desc; never invent one."
      "  update_event: match_date, match_title, and any of date, title, desc to change"
-     "  add_article: date, title, body (Markdown)"
+     "  add_article: date, title, body (the full article, Markdown; required)"
      "  none: reason"
      "  Omit fields that do not apply."]))
 
@@ -119,9 +120,11 @@
         (if-let [reason (get-in resp [:promptFeedback :blockReason])]
           {:error (str "Gemini blocked the prompt: " reason)}
           (let [text (->> (get-in resp [:candidates 0 :content :parts]) (keep :text) (apply str))]
-            (if (str/blank? text)
-              {:error (str "Gemini returned no text (finishReason "
-                           (get-in resp [:candidates 0 :finishReason]) ")")}
+            (if (or (str/blank? text) (= "MAX_TOKENS" (get-in resp [:candidates 0 :finishReason])))
+              {:error (if (= "MAX_TOKENS" (get-in resp [:candidates 0 :finishReason]))
+                        "Gemini answer was cut off (MAX_TOKENS)"
+                        (str "Gemini returned no text (finishReason "
+                             (get-in resp [:candidates 0 :finishReason]) ")"))}
               (let [parsed (json/read-value (strip-fence text) json/keyword-keys-object-mapper)]
                 (cond
                   (not (map? parsed))                 {:error "Gemini output is not a JSON object"}
@@ -131,6 +134,18 @@
     (catch com.fasterxml.jackson.core.JsonProcessingException e
       {:error (str "Gemini returned malformed JSON: " (ex-message e))})))
 
+(defn- dump-debug!
+  "SYNC_DEBUG: writes the prompt and raw response for local troubleshooting. Never throws."
+  [{:keys [debug-dir thread-id request]} prompt resp]
+  (when (and debug-dir thread-id)
+    (try
+      (let [dir  (java.io.File. (str debug-dir))
+            base (str (str/replace thread-id "/" "-") "-" (first (or request "1")))]
+        (.mkdirs dir)
+        (spit (java.io.File. dir (str base ".txt")) prompt :encoding "UTF-8")
+        (spit (java.io.File. dir (str base ".json")) (str (:body resp)) :encoding "UTF-8"))
+      (catch Exception _ nil))))
+
 (defn generate-prompt
   "One request with a ready prompt. Returns {:actions [...]} or {:error msg}.
    Network exceptions become {:error}; a 404 gets a hint about GEMINI_MODEL."
@@ -139,7 +154,9 @@
         start (System/nanoTime)
         secs  #(Math/round (/ (- (System/nanoTime) start) 1e9))]
     (log/log tag "request " (or (:request cfg) "1 (initial)") " ...")
-    (let [result (try (let [r (parse-response (req-fn (build-request cfg prompt)))]
+    (let [result (try (let [resp (req-fn (build-request cfg prompt))
+                            _    (dump-debug! cfg prompt resp)
+                            r    (parse-response resp)]
                         (if (= 404 (:status r))
                           (update r :error str " (check GEMINI_MODEL, current: " (:model cfg) ")")
                           r))
@@ -153,6 +170,11 @@
 (defn generate
   [req-fn cfg input]
   (generate-prompt req-fn cfg (build-prompt input)))
+
+(defn- field-hint [errors]
+  (when (some #(re-find #"field '" %) errors)
+    (str "Expected field names: add_event and update_event use \"desc\" (Markdown); add_article uses \"body\" "
+         "(the full article text in Markdown, required); every action needs \"type\".\n\n")))
 
 (defn build-repair-prompt
   "Original prompt + the model's previous actions + validation errors, asking for a corrected answer."
@@ -171,5 +193,6 @@
 " (map #(str "- " %) errors)) "
 
 "
+       (field-hint errors)
        "Return a corrected, complete {\"actions\": [...]} answer that fixes these problems "
        "(for example shorter plain titles; put reasoning in \"notes\"). Keep actions that were fine."))

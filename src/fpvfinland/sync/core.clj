@@ -45,6 +45,7 @@
                 :gemini-model      (or (get* "GEMINI_MODEL") "gemini-2.5-flash")
                 :lookback-days     days
                 :dry-run?          (= "true" (some-> (get* "SYNC_DRY_RUN") str/lower-case))
+                :debug?            (= "true" (some-> (get* "SYNC_DEBUG") str/lower-case))
                 :trigger-reaction  (or (get* "SYNC_REACTION") "to-www-site")
                 :done-reaction     (or (get* "SYNC_DONE_REACTION") "white_check_mark")}}))))
 
@@ -253,7 +254,8 @@
         state0   {:events-text orig :new-articles []
                   :article-names (set (map :name arts)) :article-titles (vec (keep :title arts))}
         {:keys [threads problems]} (gather-threads req-fn cfg now)
-        ctx      {:today today :gemini-cfg {:api-key (:gemini-key cfg) :model (:gemini-model cfg)}}
+        ctx      {:today today :gemini-cfg (cond-> {:api-key (:gemini-key cfg) :model (:gemini-model cfg)}
+                                         (:debug? cfg) (assoc :debug-dir (io/file root "sync-result/debug")))}
         [state outcomes]
         (reduce (fn [[state outs] t]
                   (let [anonymized (anon/anonymize-thread (:messages t))
