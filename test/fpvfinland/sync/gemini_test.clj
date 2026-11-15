@@ -54,3 +54,23 @@
 (deftest generate-wraps-exceptions
   (is (re-find #"boom" (:error (g/generate (fn [_] (throw (ex-info "boom" {}))) {:api-key "k" :model "m"}
                                            {:today "2026-01-01" :events [] :article-titles [] :thread []})))))
+
+(deftest max-tokens-reported-clearly
+  (let [truncated {:status 200 :body (json/write-value-as-string
+                                       {:candidates [{:finishReason "MAX_TOKENS"
+                                                      :content {:parts [{:text "{\"actions\": [{\"type\": \"add_ar"}]}}]})}]
+    (is (= "Gemini answer was cut off (MAX_TOKENS)" (:error (g/parse-response truncated))))))
+
+(deftest prompts-name-the-fields
+  (is (str/includes? g/system-instruction "(add_article) use \"body\", which is REQUIRED") "articles use body")
+  (let [rp (g/build-repair-prompt "P" [{:type "add_article"}] ["add_article: missing or non-string field 'body' (fields present: type)"])]
+    (is (str/includes? rp "add_article uses \"body\"")))
+  (is (not (str/includes? (g/build-repair-prompt "P" [] ["title is empty"]) "Expected field names"))))
+
+(deftest debug-dump-writes-prompt-and-response
+  (let [dir (java.nio.file.Files/createTempDirectory "dbg" (make-array java.nio.file.attribute.FileAttribute 0))
+        d   (str dir "/debug")]
+    (binding [fpvfinland.sync.log/*log-fn* (fn [_])]
+      (g/generate-prompt (fn [_] (ok "{\"actions\":[]}")) {:api-key "k" :model "m" :debug-dir d :thread-id "C1/12.5" :request "2 (repair)"} "PROMPT"))
+    (is (= "PROMPT" (slurp (str d "/C1-12.5-2.txt"))))
+    (is (str/includes? (slurp (str d "/C1-12.5-2.json")) "candidates"))))

@@ -33,8 +33,25 @@
 
 (defn- need-string [action k]
   (let [v (get action k)]
-    (when-not (string? v) (fail (str "missing or non-string field '" (name k) "'")))
+    (when-not (string? v)
+      (fail (str "missing or non-string field '" (name k) "' (fields present: "
+                 (str/join ", " (map name (keys (filter (comp some? val) action)))) ")")))
     v))
+
+(defn- usable-text? [v] (and (string? v) (not (str/blank? v))))
+
+(defn- lenient
+  "Field-name leniency: the model sometimes mixes up body (articles) and desc (events).
+   The fallback is used only when the correct field is missing or blank."
+  [action]
+  (case (:type action)
+    "add_article" (if (and (not (usable-text? (:body action))) (usable-text? (:desc action)))
+                    (assoc action :body (:desc action))
+                    action)
+    ("add_event" "update_event") (if (and (not (usable-text? (:desc action))) (usable-text? (:body action)))
+                                   (assoc action :desc (:body action))
+                                   action)
+    action))
 
 (defn- check-date! [s ^LocalDate today label]
   (let [d (parse-date s)]
@@ -121,7 +138,7 @@
   (if-not (map? action)
     {:error "action is not an object"}
     (try
-      {:ok (validate* action ctx)}
+      {:ok (validate* (lenient action) ctx)}
       (catch clojure.lang.ExceptionInfo e
         (if (::invalid (ex-data e))
           {:error (ex-message e) :action-type (:type action) :label (describe action)}

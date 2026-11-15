@@ -82,3 +82,23 @@
 
 (deftest control-characters-stripped
   (is (= "ab\ncd" (:desc (:ok (v/validate-action (assoc good-event :desc "a\u0000b\r\ncd\u0007") ctx))))))
+
+(deftest field-name-leniency
+  (testing "article text in desc is used as body"
+    (is (= {:type :add-article :date "2026-11-10" :title "Uutinen" :body "Koko teksti"}
+           (:ok (v/validate-action {:type "add_article" :date "2026-11-10" :title "Uutinen" :desc "Koko teksti"} ctx)))))
+  (testing "correct field wins when both are present"
+    (is (= "Oikea" (:body (:ok (v/validate-action (assoc good-article :body "Oikea" :desc "Väärä") ctx))))))
+  (testing "event body used as desc when desc is missing"
+    (is (= "Teksti" (:desc (:ok (v/validate-action {:type "add_event" :date "2026-12-20" :title "X" :body "Teksti"} ctx)))))
+    (is (= "Teksti" (:desc (:ok (v/validate-action {:type "update_event" :match_date "2026-12-01" :match_title "Kisa" :body "Teksti"} ctx))))))
+  (testing "event: correct desc wins"
+    (is (= "Oikea" (:desc (:ok (v/validate-action (assoc good-event :desc "Oikea" :body "Väärä") ctx)))))))
+
+(deftest missing-field-message-lists-present-fields
+  (let [e (err {:type "add_article" :date "2026-11-10" :title "T" :notes "n"})]
+    (is (re-find #"missing or non-string field 'body'" e))
+    (is (re-find #"fields present: .*type" e))
+    (is (re-find #"fields present: .*title" e))
+    (is (re-find #"fields present: .*notes" e))
+    (is (not (re-find #"fields present: .*body" e)))))

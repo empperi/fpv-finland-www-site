@@ -24,6 +24,12 @@ to `master`; a human reviews and merges the PR.
 assumed to be roughly date sorted), otherwise appended at the end; updates replace only that entry's block.
 Every write is re-read with `clojure.edn` and compared with the expected data; a mismatch aborts the run.
 
+## Debugging
+
+`SYNC_DEBUG=true` (local troubleshooting only; do not set it in the workflow) writes each Gemini prompt and raw
+response to `sync-result/debug/<channel>-<ts>-<n>.txt` / `.json` (n = 1 initial, 2 repair). The files contain the
+anonymised thread text; `sync-result/` is git-ignored.
+
 ## Run time
 
 On the free Gemini tier a single thread can take several minutes. The log prints progress lines:
