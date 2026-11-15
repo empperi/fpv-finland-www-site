@@ -1,0 +1,115 @@
+name: Slack sync
+
+# Weekly: collect Slack threads marked with the :to-www-site: reaction, ask Gemini for
+# proposed website changes and open a PR. See docs/slack-sync.md.
+on:
+  schedule:
+    # Saturday 21:00 UTC = 23:00 Finnish winter time (EET) / 00:00 Sunday summer time (EEST).
+    - cron: '0 21 * * 6'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: no Slack writes, no branch, no PR. Prints diff and PR body to the log.'
+        type: boolean
+        default: false
+
+# The job itself needs no GitHub permissions: pushing and opening the PR is done with BOT_PR_TOKEN.
+# (PRs opened with the default GITHUB_TOKEN do not trigger other workflows, so the Firebase preview
+# deploy would not run. Use a fine-grained PAT or GitHub App token with Contents and Pull requests
+# read/write on this repo as BOT_PR_TOKEN.)
+permissions:
+  contents: read
+
+concurrency:
+  group: slack-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF8"
+      LANG: "en_US.UTF-8"
+      LC_ALL: "en_US.UTF-8"
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run == true }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+          persist-credentials: false
+
+      - name: Prepare java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@13.4
+        with:
+          lein: 2.12.0
+
+      - name: Run tests
+        run: lein test
+
+      - name: Run sync
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SLACK_ALLOWED_USER_IDS: ${{ vars.SLACK_ALLOWED_USER_IDS }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          SYNC_DRY_RUN: ${{ env.DRY_RUN }}
+        run: lein slack-sync
+
+      - name: Show result (dry run)
+        if: ${{ env.DRY_RUN == 'true' }}
+        run: |
+          {
+            echo '## Slack sync dry run'
+            echo
+            cat sync-result/pr-body.md
+            echo
+            echo '### Diff'
+            echo '```diff'
+            git diff
+            git ls-files --others --exclude-standard resources/public/posts | while read -r f; do git diff --no-index /dev/null "$f" || true; done
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Detect changes
+        id: changes
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: |
+          if [ -n "$(git status --porcelain -- events.edn resources/public/posts)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: ${{ steps.changes.outputs.changed == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.BOT_PR_TOKEN }}
+        run: |
+          branch="bot/slack-sync-$(date -u +%F)-${GITHUB_RUN_ID}"
+          git config user.name "FPV Finland bot"
+          git config user.email "fpv-finland-bot@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git checkout -b "$branch"
+          git add events.edn resources/public/posts
+          git commit -m "Sync website content from Slack"
+          git push origin "$branch"
+          gh pr create --base master --head "$branch" \
+            --title "Slack sync $(date -u +%F)" \
+            --body-file sync-result/pr-body.md
+
+      # Mark threads with the done reaction only after the PR exists (or when there was nothing to
+      # change but some threads were deliberately classified as "nothing to publish").
+      - name: Mark threads as processed in Slack
+        if: ${{ env.DRY_RUN != 'true' }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: lein slack-sync mark-done sync-result/processed.json

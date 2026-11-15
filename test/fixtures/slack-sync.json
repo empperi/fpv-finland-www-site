@@ -1,0 +1,43 @@
+{
+  "env": {"SLACK_ALLOWED_USER_IDS": "U_ADMIN, U_ADMIN2"},
+  "slack": {
+    "auth.test": {"ok": true, "user_id": "U_BOT"},
+    "conversations.list": {"ok": true, "channels": [
+      {"id": "C1", "name": "yleinen", "is_member": true},
+      {"id": "C2", "name": "ei-liitytty", "is_member": false}
+    ]},
+    "conversations.history:C1": {"ok": true, "messages": [
+      {"ts": "1000.1", "user": "U_A", "text": "Talvikisa 12.12. Launoisissa, 5\" kokoluokka. Yhteys <mailto:mikko@example.com|mikko@example.com>, <@U_B> tietää lisää.", "reply_count": 1,
+       "reactions": [{"name": "to-www-site", "users": ["U_ADMIN"], "count": 1}]},
+      {"ts": "1000.2", "user": "U_A", "text": "Ei saa ottaa mukaan",
+       "reactions": [{"name": "to-www-site", "users": ["U_OTHER"], "count": 1}]},
+      {"ts": "1000.3", "user": "U_A", "text": "Jo käsitelty",
+       "reactions": [{"name": "to-www-site", "users": ["U_ADMIN"], "count": 1}, {"name": "white_check_mark", "users": ["U_BOT"], "count": 1}]},
+      {"ts": "1000.4", "user": "U_B", "text": "Raportti kisasta: se meni hyvin!",
+       "reactions": [{"name": "to-www-site", "users": ["U_ADMIN2"], "count": 1}]},
+      {"ts": "1000.5", "user": "U_B", "text": "Huono päivämäärä",
+       "reactions": [{"name": "to-www-site", "users": ["U_ADMIN"], "count": 1}]},
+      {"ts": "1000.6", "user": "U_B", "text": "Gemini hajoaa",
+       "reactions": [{"name": "to-www-site", "users": ["U_ADMIN"], "count": 1}]},
+      {"ts": "1000.7", "user": "U_B", "text": "Pelkkää juttelua",
+       "reactions": [{"name": "to-www-site", "users": ["U_ADMIN"], "count": 1}]}
+    ]},
+    "conversations.replies:C1:1000.1": {"ok": true, "messages": [
+      {"ts": "1000.1", "user": "U_A", "text": "Talvikisa 12.12. Launoisissa, 5\" kokoluokka. Yhteys <mailto:mikko@example.com|mikko@example.com>, <@U_B> tietää lisää."},
+      {"ts": "1000.11", "user": "U_B", "text": "Joo, ja Kolmas-tapahtuman kuvaus päivittyi."}
+    ]},
+    "chat.getPermalink:C1:1000.1": {"ok": true, "permalink": "https://example.slack.com/archives/C1/p10001"},
+    "chat.getPermalink:C1:1000.4": {"ok": true, "permalink": "https://example.slack.com/archives/C1/p10004"},
+    "chat.getPermalink:C1:1000.5": {"ok": true, "permalink": "https://example.slack.com/archives/C1/p10005"},
+    "chat.getPermalink:C1:1000.6": {"ok": true, "permalink": "https://example.slack.com/archives/C1/p10006"},
+    "chat.getPermalink:C1:1000.7": {"ok": true, "permalink": "https://example.slack.com/archives/C1/p10007"}
+  },
+  "gemini": [
+    {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_event\",\"date\":\"2026-12-12\",\"title\":\"Talvikisa\",\"desc\":\"Kisaamme 5\\\" kokoluokalla Launoisissa. Lisätietoja: https://example.com\",\"notes\":\"Päivämäärä 12.12. tulkittu tälle vuodelle, @someone vahvistaa paikan.\"},{\"type\":\"update_event\",\"match_date\":\"2026-10-30\",\"match_title\":\"Kolmas\",\"desc\":\"Päivitetty kuvaus\"}]}"}]}}]},
+    {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_article\",\"date\":\"2026-11-14\",\"title\":\"Kisaraportti: \\\"Talvi\\\" meni hyvin\",\"body\":\"Kisa sujui hyvin ja osallistujia oli runsaasti.\"}]}"}]}}]},
+    {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_event\",\"date\":\"2026-02-30\",\"title\":\"Mahdoton\",\"desc\":\"x\"}]}"}]}}]},
+    {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"add_event\",\"date\":\"2026-02-30\",\"title\":\"Mahdoton\",\"desc\":\"x\"}]}"}]}}]},
+    {"candidates": [{"content": {"parts": [{"text": "{\"actions\": [ oops"}]}}]},
+    {"candidates": [{"content": {"parts": [{"text": "{\"actions\":[{\"type\":\"none\",\"reason\":\"Pelkkaa keskustelua\"}]}"}]}}]}
+  ]
+}
