@@ -10,7 +10,7 @@
             [fpvfinland.plugins.plugins :as plugins]))
 
 (defn with-layout [html-url & page-content]
-  (apply base/with-layout html-url (nav/nav) page-content))
+  (apply base/with-layout html-url (nav/nav html-url) page-content))
 
 (defn md->hiccup [md]
   (if (string? md)
@@ -46,55 +46,8 @@
     (with-layout
       "/artikkelit/"
       [:div.content-wrap.article-list
-       [:h3 "FPV Finlandin julkaistut artikkelit aikajärjestyksessä"]
+       [:h1 "Artikkelit"]
        [:ul.article-links article-links]])))
-
-(defn class-matches? [class-attr class-to-check]
-  (-> (cond
-        (string? class-attr) (str/split class-attr #" ")
-        (coll? class-attr) class-attr
-        :else [class-attr])
-      set
-      (contains? class-to-check)))
-
-(defn img-tag? [x & [class-to-check]]
-  (let [img? (and (vector? x)
-                  (= :img (first x)))]
-    (if (and img? (some? class-to-check))
-      (class-matches? (:class (second x)) class-to-check)
-      img?)))
-
-(defn paragraph-tag? [x]
-  (and (vector? x)
-       (= :p (first x))))
-
-(defn ->child-tag [x]
-  (first (second x)))
-
-(defn convert-video [hiccup]
-  (w/postwalk
-    (fn [x]
-      (if (and (paragraph-tag? x)
-               (img-tag? (->child-tag x))
-               (str/starts-with? (:alt (second (->child-tag x))) "LEADVIDEO"))
-        (let [alt-txt      (-> x ->child-tag second :alt)
-              video-header (-> alt-txt (str/replace #"LEADVIDEO_[0-9]{1,4}[a-z]{2,}\:[ ]*(.*)" "$1"))
-              video-height (-> alt-txt (str/replace #"LEADVIDEO_([0-9]{1,4}[a-z]{2,})\:.*" "$1"))]
-          [:div {:class "video-space-reserve"
-                 :style {:height video-height}}
-           [:div {:class "lead-video"
-                  :style {:height video-height}}
-            [:div.video-caption [:h1 video-header]]
-            [:video {:autoplay                ""
-                     :muted                   ""
-                     :loop                    ""
-                     :disablePictureInPicture ""
-                     :playsInline             ""
-                     :style                   {:height video-height}}
-             [:source {:src  (-> x ->child-tag second :src)
-                       :type "video/mp4"}]]]])
-        x))
-    hiccup))
 
 (defn wrap-as-readable-article [hiccup]
   [:article
@@ -122,7 +75,6 @@
     (->html5-page
       (-> (md/slurp-md-page md-file-name)
           cmh/markdown->hiccup
-          convert-video
           apply-plugins
           (layout-fn [:div.content-wrap])))))
 

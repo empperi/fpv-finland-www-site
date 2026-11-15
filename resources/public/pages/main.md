@@ -1,4 +1,6 @@
-![LEADVIDEO_420px: YHDISTYS FPV HARRASTAJILLE](/video/fpv-finland-www-hero-video.mp4)
+[:hero]
+
+[:upcoming-events]
 
 # Mikä FPV Finland?
 
