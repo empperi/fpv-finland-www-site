@@ -3,6 +3,10 @@
             [fpvfinland.files :as files])
   (:import (java.io File)))
 
+(def membership-url "https://secure.membook.fi/#/main/joining/0dee5211-30aa-4a5b-b233-98c988eff27a")
+(def slack-url "https://fpvfinland.slack.com")
+(def webshop-url "https://fpv-finland.myspreadshop.fi/")
+
 (defn page-html-links []
   (mapv
     (comp #(if (= "main.md" %)

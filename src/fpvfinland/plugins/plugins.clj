@@ -2,6 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
             [fpvfinland.plugins.calendar :as calendar]
+            [fpvfinland.plugins.front :as front]
             [fpvfinland.plugins.button :as button]
             [fpvfinland.plugins.opengraph :as opengraph]
             [fpvfinland.plugins.article-lead :as article-lead]))
@@ -33,6 +34,8 @@
 (defn build-plugin [plugin-str]
   (cond
     (= plugin-str "[:calendar]")                   (->plugin-handler plugin-str calendar/calendar)
+    (= plugin-str "[:hero]")                       (->plugin-handler plugin-str front/hero)
+    (= plugin-str "[:upcoming-events]")            (->plugin-handler plugin-str front/upcoming-events)
     (str/starts-with? plugin-str "[:button")       (->plugin-handler plugin-str button/button)
     (str/starts-with? plugin-str "[:opengraph")    (->plugin-handler plugin-str opengraph/opengraph)
     (str/starts-with? plugin-str "[:article-lead") (->plugin-handler plugin-str article-lead/article-lead)

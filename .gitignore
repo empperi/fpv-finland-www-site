@@ -12,3 +12,6 @@ profiles.clj
 *.iml
 .idea
 .clj-kondo/.cache
+
+# Playwright MCP browser artifacts
+.playwright-mcp/

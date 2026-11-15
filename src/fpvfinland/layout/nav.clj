@@ -1,25 +1,37 @@
 (ns fpvfinland.layout.nav
-  (:require [fpvfinland.layout.search :as search]
+  (:require [clojure.string :as str]
+            [fpvfinland.layout.search :as search]
             [fpvfinland.site :as site]))
 
-(defn- nav-link [text url]
-  [:li {:class "nav-item px-0"}
-   [:a {:href url :class "nav-link link-body-emphasis px-3"} text]])
+(defn- active? [html-url url]
+  (or (= html-url url)
+      ;; section links such as /artikkelit/ are active for everything below them
+      (and (not= url "/")
+           (str/ends-with? url "/")
+           (str/starts-with? html-url url))))
 
-(defn nav-links []
+(defn- nav-link [html-url text url]
+  [:li {:class "nav-item"}
+   [:a (cond-> {:href url :class "nav-link"}
+               (active? html-url url) (assoc :aria-current "page"))
+    text]])
+
+(defn nav-links [html-url]
   (for [[site-name site-url] (site/create-main-nav-links)]
-    (nav-link site-name site-url)))
+    (nav-link html-url site-name site-url)))
 
-(defn nav []
+(defn nav [html-url]
   (list
-    [:ul {:class "nav text-uppercase fw-bold col-12 col-md-auto mb-2 justify-content-center mb-md-0"}
-     (nav-links)]
-    [:button.nav-burger-btn {:onclick "toggleBurgerMenu()"}
+    [:ul {:class "nav"}
+     (nav-links html-url)]
+    [:button.nav-burger-btn {:onclick "toggleBurgerMenu()"
+                             :type "button"
+                             :aria-label "Valikko"}
      [:img.nav-burger {:id  "burger-menu-closed"
-                       :src "/img/burger-menu.svg"}]
+                       :src "/img/burger-menu.svg"
+                       :alt ""}]
      [:span.nav-burger-open {:id    "burger-menu-open"
                              :class "hide"} "X"]]
     [:div#nav-burger-list.nav-burger-list.hide
      (search/search-input "burger")
-     [:ul {:class "text-uppercase fw-bold col-12 col-md-auto mb-2 justify-content-center mb-md-0"}
-      (nav-links)]]))
+     [:ul (nav-links html-url)]]))
