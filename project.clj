@@ -21,7 +21,9 @@
   :repl-options {:init-ns fpvfinland.core}
 
   :aliases {"run-local"  ["run" "-m" "fpvfinland.core/run-lein-dev-server"]
-            "build-site" ["run" "-m" "fpvfinland.core/export"]}
+            "build-site" ["run" "-m" "fpvfinland.core/export"]
+            ;; Slack -> website sync, see docs/slack-sync.md. Not loaded by the site build.
+            "slack-sync" ["run" "-m" "fpvfinland.sync.core"]}
 
   :ring {:handler      fpvfinland.app
          :auto-reload? true})

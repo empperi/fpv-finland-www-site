@@ -15,3 +15,6 @@ profiles.clj
 
 # Playwright MCP browser artifacts
 .playwright-mcp/
+
+# Slack sync output
+/sync-result/

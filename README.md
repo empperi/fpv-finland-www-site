@@ -156,6 +156,22 @@ milloin ainakin näet muutoksesi livenä hiin halutessasi. Tätä varten sinun e
 [Githubilla on ohjeet PR:n tekemiseen](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request),
 jos se ei ole tuttua.
 
+## Miten saan Slackissa käydyn keskustelun sivustolle?
+
+Sinun ei tarvitse osata Gitiä. Jos jossain **julkisen kanavan** viestiketjussa sovitaan tapahtumasta tai kirjoitetaan
+asiaa, mikä kuuluisi sivustolle, lisää ketjun ensimmäiseen viestiin reaktio :to-www-site:.
+
+- Vain etukäteen sovittujen henkilöiden (allowlist) reaktiot lasketaan. Muiden reaktiot eivät käynnistä mitään.
+- Botti käy läpi merkityt ketjut kerran viikossa (lauantai-iltaisin). Kun botti on ottanut ketjun käsittelyyn, se lisää
+  viestiin reaktion :white_check_mark:.
+- Botti ei julkaise mitään suoraan. Se luo PR:n, jossa ehdotetut tapahtumat ja artikkeliluonnokset ovat luettavissa, ja
+  hallitus tarkistaa tekstit. Muutokset tulevat sivustolle vasta kun ylläpitäjä on hyväksynyt ja mergennyt PR:n.
+- Tekoälylle ei lähetetä nimiä, sähköposteja tai muita tunnisteita: kirjoittajat korvataan nimillä "Jäsen 1", "Jäsen 2"
+  jne. Älä silti kirjoita ketjuun mitään, minkä et haluaisi näkyvän julkisesti.
+- Botti ottaa mukaan vain sen, mikä ketjussa lukee. Jos päivämäärä tai paikka puuttuu, tapahtumaa ei lisätä.
+
+Ylläpitäjän ohjeet ovat tiedostossa [docs/slack-sync.md](./docs/slack-sync.md).
+
 ## Miten kontribuoin itse koodiin?
 
 Koodi on tehty Clojurella, joten kyseinen ohjelmointikieli pitäisi olla edes auttavasti hyppysissä. Clojure on
